@@ -1,0 +1,29 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.node.json"
+    },
+    {
+      "path": "./tsconfig.web.json"
+    }
+  ],
+  "compilerOptions": {
+    "esModuleInterop": true,
+    "baseUrl": ".",
+    "paths": {
+      "@renderer/*": [
+        "./src/renderer/src/*"
+      ],
+      "@main/*": [
+        "./src/main/*"
+      ],
+      "@preload/*": [
+        "./src/preload/*"
+      ],
+      "@shared/*" : [
+        "./src/shared/*"
+      ],
+    }
+  }
+}
