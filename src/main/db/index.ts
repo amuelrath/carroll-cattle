@@ -1,16 +1,17 @@
 import 'dotenv/config'
-import log from 'electron-log/main'
+import { relations } from '@shared/db/schema'
 import { drizzle } from 'drizzle-orm/libsql'
-import { app } from 'electron'
-import path from 'node:path'
 import { migrate } from 'drizzle-orm/libsql/migrator'
+import { app } from 'electron'
+import log from 'electron-log/main'
+import path from 'node:path'
 
 const DEV_DB = 'dev.db'
 const PROD_DB = 'prod.db'
 
 const dbPath = path.join(app.getPath('userData'), process.env.DEV_MODE! ? DEV_DB : PROD_DB)
 
-export const db = drizzle(`file:${dbPath}`)
+export const db = drizzle(`file:${dbPath}`, { relations })
 
 export function resolveMigrationsPath(isPackaged: boolean, appPath: string, resourcesPath: string) {
   return isPackaged ? path.join(resourcesPath, 'drizzle') : path.join(appPath, 'drizzle')
