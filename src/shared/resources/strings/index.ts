@@ -1,3 +1,3 @@
-import { errors} from "./errors"
+import { errors } from './errors'
 
-export { errors}
+export { errors }
