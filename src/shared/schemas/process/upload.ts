@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { TProcess } from './index'
 
-export const ZTransOvaInventoryUploadRowSchema = z.object({
+export const ZTransOvaInventoryUploadRow = z.object({
   donor: z.string(),
   sire: z.string(),
   freezeDate: z.date(),
@@ -13,21 +13,21 @@ export const ZTransOvaInventoryUploadRowSchema = z.object({
   sex: z.enum(['RS M', 'RS F', 'N'])
 })
 
-export const ZBreedRecipientUploadRowSchema = z.object({
+export const ZBreedRecipientUploadRow = z.object({
   recipTag: z.string(),
   donor: z.string(),
   sire: z.string(),
   date: z.date()
 })
 
-export const ZCalveRecipientUploadRowSchema = z.object({
+export const ZCalveRecipientUploadRow = z.object({
   recipTag: z.string(),
   donor: z.string(),
   sire: z.string(),
   date: z.date()
 })
 
-export const ZPregnancyCheckUploadRowSchema = z.object({
+export const ZPregnancyCheckUploadRow = z.object({
   recipTag: z.string(),
   donor: z.string(),
   sire: z.string(),
@@ -35,7 +35,7 @@ export const ZPregnancyCheckUploadRowSchema = z.object({
 })
 
 // todo remove me
-export const ZPenguinUploadRowSchema = z.object({
+export const ZPenguinUploadRow = z.object({
   species: z.enum(['Adelie', 'Gentoo', 'Chinstrap']),
   island: z.enum(['Torgersen', 'Biscoe', 'Dream']),
   billLength: z.float32(),
@@ -47,9 +47,9 @@ export const ZPenguinUploadRowSchema = z.object({
 })
 
 export const processUploadRowSchemaMap: Record<TProcess, z.ZodType> = {
-  calveRecip: ZCalveRecipientUploadRowSchema,
-  breedRecip: ZBreedRecipientUploadRowSchema,
-  pregCheck: ZPregnancyCheckUploadRowSchema,
-  transOvaInventory: ZTransOvaInventoryUploadRowSchema,
-  penguins: ZPenguinUploadRowSchema
+  calveRecip: ZCalveRecipientUploadRow,
+  breedRecip: ZBreedRecipientUploadRow,
+  pregCheck: ZPregnancyCheckUploadRow,
+  transOvaInventory: ZTransOvaInventoryUploadRow,
+  penguins: ZPenguinUploadRow
 }
