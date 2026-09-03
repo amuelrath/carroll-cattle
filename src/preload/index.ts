@@ -1,8 +1,5 @@
-// @ts-ignore initialize logging
-// eslint-disable-next-line
-import log from 'electron-log/preload'
-import { contextBridge } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
+import { contextBridge } from 'electron'
 import { exposeElectronTRPC } from 'trpc-electron/main'
 
 // Custom APIs for renderer
