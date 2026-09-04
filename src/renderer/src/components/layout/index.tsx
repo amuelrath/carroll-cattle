@@ -19,7 +19,7 @@ export function Shell({ children }: ShellProps): React.JSX.Element {
         <TitleBar />
         <div className="flex min-h-0 flex-grow flex-row">
           <SideBar />
-          <main className="border-border min-h-0 flex-1 rounded-tl-md border bg-white">
+          <main className="border-border min-h-0 flex-1 overflow-hidden rounded-tl-md border bg-white">
             <TooltipProvider delay={200}>{children}</TooltipProvider>
           </main>
         </div>
