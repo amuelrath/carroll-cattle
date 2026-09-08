@@ -16,3 +16,10 @@ export const iconSizes = {
     strokeWidth: 1
   }
 } as const
+
+export const searchParamNames = {
+  processTab: 'processTab',
+  processId: 'processId',
+  filePath: 'filePath',
+  sheetName: 'sheetName'
+} as const
