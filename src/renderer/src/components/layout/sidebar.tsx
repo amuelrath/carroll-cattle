@@ -1,10 +1,10 @@
-import React from 'react'
-import { Button } from '../ui/button'
-import { HistoryIcon, HomeIcon, SettingsIcon, BotIcon } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import { cn } from '@renderer/lib/utils'
 import { ROUTES } from '@shared/routes'
+import { motion } from 'framer-motion'
+import { BotIcon, HistoryIcon, HomeIcon, SettingsIcon } from 'lucide-react'
+import React from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { Button } from '../ui/button'
 
 const navItems = [
   { path: ROUTES.home, icon: HomeIcon },
@@ -21,7 +21,7 @@ function SideBar(): React.JSX.Element {
     <aside className="flex w-10 flex-col items-center bg-transparent">
       <div className="flex flex-1 flex-col items-center justify-start gap-1 pt-2">
         {navItems.map(({ path, icon: Icon }) => {
-          const isActive = location.pathname === path
+          const isActive = location.pathname.includes(path)
 
           return (
             <Button
