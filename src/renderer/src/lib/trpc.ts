@@ -1,36 +1,35 @@
 import type { AppRouter } from '@main/trpc'
+import { toast } from '@renderer/components/ui/toast'
+import logger from '@renderer/lib/logger'
 import { errors } from '@shared/resources/strings'
-import { createTRPCProxyClient, TRPCLink } from '@trpc/client'
+import { TRPCLink } from '@trpc/client'
+import { createTRPCReact } from '@trpc/react-query'
 import { observable } from '@trpc/server/observable'
-import log from 'electron-log/renderer'
 import { ipcLink } from 'trpc-electron/renderer'
-import { toast } from '../components/ui/toast'
-import { navigate } from './nav-ref'
 
 const responseLink: TRPCLink<AppRouter> = () => {
   return ({ next, op }) => {
+    const source = op.path.split('.').pop() // "importSheet"
     return observable((observer) => {
       return next(op).subscribe({
         next(value) {
-          // eslint-disable-next-line
-          const res = value.result.data as any
-          if (res?.redirect) navigate(res.redirect)
-          if (res?.toast) {
-            toast.add({
-              type: res.toast.type,
-              description: res.toast.message
-            })
-          }
           observer.next(value)
         },
         error(err) {
           toast.add({
-            type: err.data?.toast?.type ?? 'error',
-            description: err.data?.toast?.message ?? errors.unknown
+            type: 'error',
+            description: err.data?.toast ?? errors.unknown
           })
-          if (err.data?.toast) {
-            log.error(err.message, err.data?.causeMessage ?? err.cause)
-          }
+
+          logger.error({
+            process: '[main]',
+            call: `[${source}]`,
+            type: err.data?.type,
+            params: JSON.stringify(op.input),
+            message: err.message,
+            cause: err.cause,
+            stack: err.stack
+          })
           observer.error(err)
         },
         complete() {
@@ -41,6 +40,7 @@ const responseLink: TRPCLink<AppRouter> = () => {
   }
 }
 
-export const trpc = createTRPCProxyClient<AppRouter>({
+export const trpc = createTRPCReact<AppRouter>()
+export const trpcClient = trpc.createClient({
   links: [responseLink, ipcLink()]
 })
