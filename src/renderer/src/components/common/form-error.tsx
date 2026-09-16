@@ -3,5 +3,5 @@ interface FormErrorProps {
 }
 
 export function FormError({ message }: FormErrorProps) {
-  return <span className="text-destructive text-center text-xs">{message}</span>
+  return <span className="text-destructive-foreground text-center text-xs">{message}</span>
 }
