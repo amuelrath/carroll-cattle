@@ -1,5 +1,5 @@
+import type { TJobKey } from '@shared/schemas/jobs'
 import { z } from 'zod'
-import { TProcess } from './index'
 
 export const ZTransOvaInvRow = z.object({
   donor: z.string().describe('Donor animal ID'),
@@ -12,6 +12,7 @@ export const ZTransOvaInvRow = z.object({
   grade: z.int().describe('Embryo quality grade'),
   sex: z.enum(['RS M', 'RS F', 'N']).describe('Sexed result: male, female, or non-sexed')
 })
+export type TTransOvaInvRow = z.infer<typeof ZTransOvaInvRow>
 
 export const ZBreedRecipRow = z.object({
   recipTag: z.string().describe('Recipient animal tag ID'),
@@ -19,6 +20,7 @@ export const ZBreedRecipRow = z.object({
   sire: z.string().describe('Sire animal ID'),
   date: z.date().describe('Breeding date')
 })
+export type TBreedRecipRow = z.infer<typeof ZBreedRecipRow>
 
 export const ZCalveRecipRow = z.object({
   recipTag: z.string().describe('Recipient animal tag ID'),
@@ -26,6 +28,7 @@ export const ZCalveRecipRow = z.object({
   sire: z.string().describe('Sire animal ID'),
   date: z.date().describe('Calving date')
 })
+export type TCalveRecipRow = z.infer<typeof ZCalveRecipRow>
 
 export const ZPregCheckRow = z.object({
   recipTag: z.string().describe('Recipient animal tag ID'),
@@ -33,8 +36,8 @@ export const ZPregCheckRow = z.object({
   sire: z.string().describe('Sire animal ID'),
   date: z.date().describe('Pregnancy check date')
 })
+export type TPregCheckRow = z.infer<typeof ZPregCheckRow>
 
-// todo remove me
 export const ZPenguinRow = z.object({
   species: z.enum(['Adelie', 'Gentoo', 'Chinstrap']).describe('Penguin species'),
   island: z.enum(['Torgersen', 'Biscoe', 'Dream']).describe('Island where observed'),
@@ -45,11 +48,15 @@ export const ZPenguinRow = z.object({
   sex: z.enum(['male', 'female']).describe('Penguin sex'),
   year: z.int().describe('Year of observation')
 })
+export type TPenguinRow = z.infer<typeof ZPenguinRow>
 
-export const processUploadRowSchemaMap: Record<TProcess, z.ZodObject> = {
+export const uploadSchemas = {
   calveRecip: ZCalveRecipRow,
   breedRecip: ZBreedRecipRow,
   pregCheck: ZPregCheckRow,
   transOvaInventory: ZTransOvaInvRow,
   penguins: ZPenguinRow
-}
+} satisfies Record<TJobKey, z.ZodType>
+export type TUploadSchemas = typeof uploadSchemas
+
+export type TFileRow<K extends TJobKey> = z.infer<TUploadSchemas[K]>
