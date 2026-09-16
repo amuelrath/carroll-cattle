@@ -1,12 +1,14 @@
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { startUtility } from '@main/core/start-utility'
+import { getDb } from '@main/db'
+import { runMigrations } from '@main/lib/migrations'
 import { app, BrowserWindow } from 'electron'
 import log from 'electron-log/main'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { createMainWindow } from './core/main-window'
-import { createContext } from './trpc/context'
-import { appRouter } from './trpc'
 import { createIPCHandler } from 'trpc-electron/main'
+import { createMainWindow } from './core/main-window'
 import { seedIfEmpty } from './db/seed-if-empty'
-import { runMigrations } from './db'
+import { appRouter } from './trpc'
+import { createContext } from './trpc/context'
 
 log.initialize()
 
@@ -18,7 +20,7 @@ app.whenReady().then(async () => {
   electronApp.setAppUserModelId('com.electron')
 
   // Initialize DB and seed.
-  await runMigrations()
+  await runMigrations(getDb())
   await seedIfEmpty()
 
   console.log(app.getPath('userData'))
