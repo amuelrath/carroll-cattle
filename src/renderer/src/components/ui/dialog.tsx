@@ -2,8 +2,9 @@ import { Dialog as DialogPrimitive } from '@base-ui/react/dialog'
 import { Button } from '@renderer/components/ui/button'
 
 import { cn } from '@renderer/lib/utils'
-import { XIcon } from 'lucide-react'
+import { LucideIcon, XIcon } from 'lucide-react'
 import * as React from 'react'
+import { IconCircle } from '../common/icon-circle'
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -48,7 +49,7 @@ function DialogContent({
       <DialogPrimitive.Popup
         data-slot="dialog-content"
         className={cn(
-          'bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 gap-4 rounded-xl p-8 text-sm ring-1 duration-100 outline-none sm:max-w-sm',
+          'bg-popover text-popover-foreground ring-foreground/10 data-open:animate-in data-open:fade-in-0 data-open:zoom-in-95 data-closed:animate-out data-closed:fade-out-0 data-closed:zoom-out-95 fixed top-1/2 left-1/2 z-50 flex grid w-full max-w-[calc(100%-2rem)] -translate-x-1/2 -translate-y-1/2 flex-col gap-2 gap-4 rounded-xl p-8 text-sm ring-1 duration-100 outline-none sm:max-w-sm',
           className
         )}
         {...props}
@@ -86,7 +87,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        'bg-muted/50 -mx-4 -mb-4 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 sm:flex-row sm:justify-end',
+        'bg-muted/50 -mx-8 -mb-8 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 sm:flex-row sm:justify-end',
         className
       )}
       {...props}
@@ -122,6 +123,28 @@ function DialogDescription({ className, ...props }: DialogPrimitive.Description.
   )
 }
 
+interface CustomDialogHeaderProps {
+  icon: LucideIcon
+  title: string
+  description: string
+}
+
+function CustomDialogHeader({ icon, title, description }: CustomDialogHeaderProps) {
+  return (
+    <DialogHeader className="-mx-8 border-b px-8 pb-6">
+      <div className="flex flex-row items-center gap-2">
+        <IconCircle Icon={icon} size="large" />
+        <div className="space-y-1">
+          <DialogTitle className="flex flex-row items-center space-x-2">
+            <span className="text-md">{title}</span>
+          </DialogTitle>
+          <DialogDescription>{description}</DialogDescription>
+        </div>
+      </div>
+    </DialogHeader>
+  )
+}
+
 export {
   Dialog,
   DialogClose,
@@ -132,5 +155,6 @@ export {
   DialogOverlay,
   DialogPortal,
   DialogTitle,
-  DialogTrigger
+  DialogTrigger,
+  CustomDialogHeader
 }
