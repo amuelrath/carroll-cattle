@@ -1,8 +1,8 @@
+import { is } from '@electron-toolkit/utils'
 import { BrowserWindow, shell } from 'electron'
+import { join } from 'path'
 // @ts-ignore png import
 import icon from '../../../resources/icon.png'
-import { join } from 'path'
-import { is } from '@electron-toolkit/utils'
 
 export function createMainWindow(): BrowserWindow {
   // Create the browser window.
@@ -20,7 +20,9 @@ export function createMainWindow(): BrowserWindow {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false
+      sandbox: false,
+      contextIsolation: true,
+      nodeIntegration: false
     }
   })
 
