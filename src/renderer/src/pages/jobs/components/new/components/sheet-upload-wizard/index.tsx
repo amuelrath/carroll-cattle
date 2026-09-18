@@ -34,7 +34,7 @@ export function SheetUploadWizard({
 }: SheetUploadWiardProps): React.JSX.Element {
   const [step, setStep] = useState<Step>('select-sheet')
 
-  const { jobTab } = useSearch({ from: '/jobs/new/' })
+  const { processId } = useSearch({ from: '/jobs/new/' })
   const navigate = useNavigate()
   const utils = trpc.useUtils()
   const { mutateCreateJob } = useCreateJobMutation()
@@ -42,7 +42,7 @@ export function SheetUploadWizard({
   const methods = useForm<TAllStepsInput, unknown, TAllStepsOutput>({
     resolver: async (vals, ctx, opts) => {
       const sheetKeys = Object.keys(vals.stepOne.headRows?.[0] || {})
-      const schema = buildFullSchema(jobTab, sheetKeys)
+      const schema = buildFullSchema(processId, sheetKeys)
       return zodResolver(schema)(vals, ctx, opts)
     }
   })
@@ -81,7 +81,7 @@ export function SheetUploadWizard({
   const onSubmit = async (data: TAllStepsOutput) => {
     const res = await utils.sheet.validateSheet.fetch({
       filePath: data.stepOne.filePath,
-      jobKey: jobTab,
+      processId: processId,
       sheetName: data.stepOne.sheetName,
       columnMap: data.stepTwo.columnMap
     })
@@ -91,7 +91,7 @@ export function SheetUploadWizard({
       // go straight to a dispatch confirmation step
       await mutateCreateJob({
         filePath: data.stepOne.filePath,
-        jobKey: jobTab,
+        processId: processId,
         sheetName: data.stepOne.sheetName,
         columnMap: data.stepTwo.columnMap
       })
@@ -101,7 +101,7 @@ export function SheetUploadWizard({
     await navigate({
       to: '/jobs/validate',
       search: {
-        jobKey: jobTab,
+        processId: processId,
         sheetName: data.stepOne.sheetName,
         filePath: data.stepOne.filePath,
         columnMap: data.stepTwo.columnMap

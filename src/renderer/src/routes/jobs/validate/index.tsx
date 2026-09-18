@@ -1,10 +1,10 @@
 import { ValidatePage } from '@renderer/pages/jobs'
-import { ZJobKey } from '@shared/schemas/jobs'
+import { ZProcessId } from '@shared/schemas/jobs'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
 export const ZValidateSearch = z.object({
-  jobKey: ZJobKey,
+  processId: ZProcessId,
   filePath: z.string().min(1),
   sheetName: z.string().min(1),
   columnMap: z.record(z.string(), z.string())

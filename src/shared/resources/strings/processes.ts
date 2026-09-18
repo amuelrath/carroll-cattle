@@ -1,5 +1,5 @@
 import { TInsertProcess } from '@shared/db/schema'
-import { TProcess } from '@shared/schemas/process'
+import type { TProcessId } from '@shared/schemas/jobs'
 import {
   BabyIcon,
   BirdIcon,
@@ -17,7 +17,7 @@ import {
 } from '../schemas/process-examples'
 
 export const PROCESS_COPY: Record<
-  TProcess,
+  TProcessId,
   Omit<TInsertProcess, 'id'> & {
     Icon: LucideIcon
     exampleData: Record<string, any>[]

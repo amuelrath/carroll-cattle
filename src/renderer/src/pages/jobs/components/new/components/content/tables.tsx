@@ -10,16 +10,16 @@ import {
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { isDate } from '@renderer/lib/strings'
 import { PROCESS_COPY } from '@shared/resources/strings'
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import React from 'react'
 
 interface ExampleDataTableProps {
-  jobKey: TJobKey
+  processId: TProcessId
 }
 
-export function ExampleDataTable({ jobKey }: ExampleDataTableProps): React.JSX.Element {
-  const exampleRows = PROCESS_COPY[jobKey].exampleData
+export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JSX.Element {
+  const exampleRows = PROCESS_COPY[processId].exampleData
   return (
     <div className="border-border rounded-md border">
       <Table className="table-fixed text-xs">
@@ -75,11 +75,11 @@ export function ExampleDataTable({ jobKey }: ExampleDataTableProps): React.JSX.E
 }
 
 interface DataDefinitionTableProps {
-  jobKey: TJobKey
+  processId: TProcessId
 }
 
-export function DataDefinitionTable({ jobKey }: DataDefinitionTableProps): React.JSX.Element {
-  const schema = uploadSchemas[jobKey]
+export function DataDefinitionTable({ processId }: DataDefinitionTableProps): React.JSX.Element {
+  const schema = uploadSchemas[processId]
   return (
     <div className="border-border rounded-md border">
       <Table className="table-fixed text-xs">

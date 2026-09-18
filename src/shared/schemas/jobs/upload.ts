@@ -1,4 +1,4 @@
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import { z } from 'zod'
 
 export const ZTransOvaInvRow = z.object({
@@ -55,8 +55,9 @@ export const uploadSchemas = {
   breedRecip: ZBreedRecipRow,
   pregCheck: ZPregCheckRow,
   transOvaInventory: ZTransOvaInvRow,
-  penguins: ZPenguinRow
-} satisfies Record<TJobKey, z.ZodType>
+  penguins: ZPenguinRow,
+  automateNow: ZAutomateNowRow
+} satisfies Record<TProcessId, z.ZodType>
 export type TUploadSchemas = typeof uploadSchemas
 
-export type TFileRow<K extends TJobKey> = z.infer<TUploadSchemas[K]>
+export type TFileRow<K extends TProcessId> = z.infer<TUploadSchemas[K]>

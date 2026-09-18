@@ -1,10 +1,10 @@
 import { z } from 'zod'
 
-export const ZJobKey = z.enum([
+export const ZProcessId = z.enum([
   'transOvaInventory',
   'breedRecip',
   'calveRecip',
   'pregCheck',
   'penguins'
 ])
-export type TJobKey = z.infer<typeof ZJobKey>
+export type TProcessId = z.infer<typeof ZProcessId>

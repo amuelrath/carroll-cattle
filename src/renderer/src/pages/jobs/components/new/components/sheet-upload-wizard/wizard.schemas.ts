@@ -1,4 +1,4 @@
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import { z } from 'zod'
 
@@ -13,7 +13,7 @@ export const ZStepOne = z.object({
 export type TStepOneInput = z.input<typeof ZStepOne>
 export type TStepOneOutput = z.output<typeof ZStepOne>
 
-export function buildStepTwoSchema(processId: TJobKey, colNames: string[]) {
+export function buildStepTwoSchema(processId: TProcessId, colNames: string[]) {
   const reqKeys = uploadSchemas[processId].keyof()
   const sheetKeys = z.enum(colNames)
   return z
@@ -27,10 +27,10 @@ export function buildStepTwoSchema(processId: TJobKey, colNames: string[]) {
 export type TStepTwoInput = z.input<ReturnType<typeof buildStepTwoSchema>>
 export type TStepTwoOutput = z.output<ReturnType<typeof buildStepTwoSchema>>
 
-export function buildFullSchema(jobKey: TJobKey, sheetKeys: string[]) {
+export function buildFullSchema(processId: TProcessId, sheetKeys: string[]) {
   return z.object({
     stepOne: ZStepOne,
-    stepTwo: buildStepTwoSchema(jobKey, sheetKeys)
+    stepTwo: buildStepTwoSchema(processId, sheetKeys)
   })
 }
 

@@ -13,7 +13,7 @@ import { Sidebar } from './components/sidebar'
 
 export function ValidatePage(): React.JSX.Element {
   const isFirstRender = useRef(true)
-  const { filePath, sheetName, columnMap, jobKey } = useSearch({ from: '/jobs/validate/' })
+  const { filePath, sheetName, columnMap, processId } = useSearch({ from: '/jobs/validate/' })
   const { mutateCreateJob } = useCreateJobMutation()
   const { mutateAsync: mutateOpenPath } = trpc.system.openPath.useMutation()
   const { refetch: refetchSheet, data: sheet } = trpc.sheet.fetchSheet.useQuery({
@@ -22,7 +22,7 @@ export function ValidatePage(): React.JSX.Element {
   })
 
   const { refetch: refetchValidation, data: validationRes } = trpc.sheet.validateSheet.useQuery({
-    jobKey,
+    processId,
     sheetName,
     filePath,
     columnMap
@@ -46,7 +46,7 @@ export function ValidatePage(): React.JSX.Element {
 
   const handleContinue = async () => {
     await mutateCreateJob({
-      jobKey,
+      processId,
       sheetName,
       filePath,
       columnMap

@@ -25,7 +25,7 @@ export class JobService {
     const file = { fileName, sheetName }
 
     return this.sheetService
-      .validateSheet({ filePath, sheetName, columnMap, jobKey })
+      .validateSheet({ filePath, sheetName, columnMap, processId })
       .andThen((res) => unwrapValidation(res))
       .asyncAndThen((rows) =>
         this.filesDbService.createFileWithRows({ file, rows }).map((fileId) => ({ fileId, rows }))

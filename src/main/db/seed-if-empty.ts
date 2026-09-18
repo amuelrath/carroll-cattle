@@ -1,7 +1,7 @@
 import { getDb } from '@main/db/index'
 import { processes } from '@shared/db/schema'
 import { PROCESS_COPY } from '@shared/resources/strings/processes'
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import log from 'electron-log/main'
 
 export async function seedIfEmpty() {
@@ -12,7 +12,7 @@ export async function seedIfEmpty() {
         .insert(processes)
         .values([
           ...Object.entries(PROCESS_COPY).map(([id, { name, desc }]) => ({
-            id: id as TJobKey,
+            id: id as TProcessId,
             name,
             desc
           }))

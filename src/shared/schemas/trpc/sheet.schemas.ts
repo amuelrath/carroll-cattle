@@ -1,4 +1,4 @@
-import { ZJobKey } from '@shared/schemas/jobs'
+import { ZProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import { z } from 'zod'
 
@@ -29,10 +29,10 @@ export const ZFetchSheetResponse = z.object({
 export type TFetchSheetResponse = z.infer<typeof ZFetchSheetResponse>
 
 export const ZValidateSheetInput = ZFetchSheetInput.extend({
-  jobKey: ZJobKey,
+  processId: ZProcessId,
   columnMap: z.record(z.string(), z.string())
 }).superRefine((val, ctx) => {
-  const reqKeys = uploadSchemas[val.jobKey].keyof().options as string[]
+  const reqKeys = uploadSchemas[val.processId].keyof().options as string[]
   const mapKeys = Object.keys(val.columnMap)
 
   for (const key of reqKeys) {

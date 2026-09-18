@@ -2,7 +2,7 @@ import { ZJobKey } from '@shared/schemas/jobs'
 import { z } from 'zod'
 
 export const ZCreateJobInput = z.object({
-  jobKey: ZJobKey,
+  processId: ZProcessId,
   filePath: z.string().min(1),
   sheetName: z.string().min(1),
   columnMap: z.record(z.string().min(1), z.string().min(1))

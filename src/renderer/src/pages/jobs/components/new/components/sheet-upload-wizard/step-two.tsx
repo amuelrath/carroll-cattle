@@ -22,7 +22,7 @@ import { buildFullSchema, TAllStepsInput, TAllStepsOutput } from './wizard.schem
 
 // MaybeToDo: Consider the case we have optional fields.
 export function StepMapColumns(): React.JSX.Element {
-  const { jobTab: jobKey } = useSearch({ from: '/jobs/new/' })
+  const { processId } = useSearch({ from: '/jobs/new/' })
   const {
     getValues,
     setValue,
@@ -44,7 +44,7 @@ export function StepMapColumns(): React.JSX.Element {
   const usedSheetKeys = Object.values(currentColumnMap) as string[]
 
   // rebuild the schema
-  const schema = useMemo(() => buildFullSchema(jobKey, sheetKeys), [jobKey, sheetKeys])
+  const schema = useMemo(() => buildFullSchema(processId, sheetKeys), [processId, sheetKeys])
 
   // there has to be a cleaner way to get this. still works though
   const targetKeys = useMemo(() => {

@@ -6,7 +6,7 @@ import { Progress } from '@renderer/components/ui/progress'
 import { Separator } from '@renderer/components/ui/separator'
 import { iconSizes } from '@renderer/lib/tokens'
 import type { TStatus } from '@shared/db/schema'
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import { Link } from '@tanstack/react-router'
 import {
   AlertTriangleIcon,
@@ -47,11 +47,11 @@ export function ActiveJobsSection(): React.JSX.Element {
 interface ActiveJobItemProps {
   // status of the most recent action
   status: Exclude<TStatus, 'complete'>
-  jobKey: TJobKey
+  processId: TProcessId
   // ToDo: Row Tracking
 }
 
-function ActiveJobItem({ status, jobKey }: ActiveJobItemProps) {
+function ActiveJobItem({ status, processId }: ActiveJobItemProps) {
   let variant: Exclude<IconCircleProps['variant'], null | undefined>
   let icon: LucideIcon
   switch (status) {

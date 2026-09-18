@@ -10,7 +10,7 @@ import { Separator } from '@renderer/components/ui/separator'
 import { TabsContent } from '@renderer/components/ui/tabs'
 import { iconSizes } from '@renderer/lib/tokens'
 import { PROCESS_COPY } from '@shared/resources/strings'
-import type { TJobKey } from '@shared/schemas/jobs'
+import type { TProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import { DownloadIcon } from 'lucide-react'
 import React from 'react'
@@ -20,12 +20,12 @@ import { contentCopy as copy } from './_copy'
 import { DataDefinitionTable, ExampleDataTable } from './tables'
 
 interface JobContentProps {
-  jobKey: TJobKey
+  processId: TProcessId
 }
 
-function downloadTemplate(jobKey: TJobKey) {
-  const headers = Object.keys(uploadSchemas[jobKey].shape)
-  const wbName = `${PROCESS_COPY[jobKey].name} Template.xlsx`
+function downloadTemplate(processId: TProcessId) {
+  const headers = Object.keys(uploadSchemas[processId].shape)
+  const wbName = `${PROCESS_COPY[processId].name} Template.xlsx`
 
   const ws = XLSX.utils.json_to_sheet([headers])
   const wb = XLSX.utils.book_new()
@@ -33,17 +33,17 @@ function downloadTemplate(jobKey: TJobKey) {
   XLSX.writeFile(wb, wbName)
 }
 
-export function JobContent({ jobKey }: JobContentProps): React.JSX.Element {
-  const { name, desc } = PROCESS_COPY[jobKey]
+export function JobContent({ processId }: JobContentProps): React.JSX.Element {
+  const { name, desc } = PROCESS_COPY[processId]
 
   const handleTemplateDownload = () => {
-    downloadTemplate(jobKey)
+    downloadTemplate(processId)
   }
 
   return (
     <TabsContent
-      key={jobKey}
-      value={jobKey}
+      key={processId}
+      value={processId}
       className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-2"
     >
       <div className="flex flex-row items-center justify-between">
@@ -69,13 +69,13 @@ export function JobContent({ jobKey }: JobContentProps): React.JSX.Element {
             <AccordionItem value="example-data">
               <AccordionTrigger>{copy.exampleData}</AccordionTrigger>
               <AccordionContent>
-                <ExampleDataTable jobKey={jobKey} />
+                <ExampleDataTable processId={processId} />
               </AccordionContent>
             </AccordionItem>
             <AccordionItem value="data-denitions">
               <AccordionTrigger>{copy.columnDefinitions}</AccordionTrigger>
               <AccordionContent>
-                <DataDefinitionTable jobKey={jobKey} />
+                <DataDefinitionTable processId={processId} />
               </AccordionContent>
             </AccordionItem>
           </Accordion>

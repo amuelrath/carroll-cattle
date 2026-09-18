@@ -37,8 +37,8 @@ export class SheetService {
   }
 
   validateSheet(input: TValidateSheetInput): Result<TValidateSheetResponse, SheetError> {
-    const { jobKey, columnMap, sheetName, filePath } = input
-    const schema = uploadSchemas[jobKey]
+    const { processId, columnMap, sheetName, filePath } = input
+    const schema = uploadSchemas[processId]
 
     return pathExists({ filePath })
       .andThen(() => readWorkbook({ filePath }))
