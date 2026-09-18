@@ -5,6 +5,7 @@ import { errors } from '@shared/resources/strings'
 import { TRPCLink } from '@trpc/client'
 import { createTRPCReact } from '@trpc/react-query'
 import { observable } from '@trpc/server/observable'
+import superjson from 'superjson'
 import { ipcLink } from 'trpc-electron/renderer'
 
 const responseLink: TRPCLink<AppRouter> = () => {
@@ -42,5 +43,5 @@ const responseLink: TRPCLink<AppRouter> = () => {
 
 export const trpc = createTRPCReact<AppRouter>()
 export const trpcClient = trpc.createClient({
-  links: [responseLink, ipcLink()]
+  links: [responseLink, ipcLink({ transformer: superjson })]
 })

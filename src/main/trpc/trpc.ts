@@ -1,5 +1,6 @@
 import { type AppError, isAppError, ToastableError } from '@shared/errors'
 import { initTRPC } from '@trpc/server'
+import superjson from 'superjson'
 import type { Context } from './context'
 
 interface ErrorData {
@@ -20,7 +21,8 @@ const t = initTRPC.context<Context>().create({
         toast: cause?.toast
       } satisfies ErrorData & typeof shape.data
     }
-  }
+  },
+  transformer: superjson
 })
 
 export const router = t.router
