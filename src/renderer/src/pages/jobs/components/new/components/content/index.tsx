@@ -9,7 +9,8 @@ import { Item, ItemContent, ItemDescription } from '@renderer/components/ui/item
 import { Separator } from '@renderer/components/ui/separator'
 import { TabsContent } from '@renderer/components/ui/tabs'
 import { iconSizes } from '@renderer/lib/tokens'
-import { PROCESS_COPY } from '@shared/resources/strings'
+import { trpc } from '@renderer/lib/trpc'
+
 import type { TProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import { DownloadIcon } from 'lucide-react'
@@ -23,9 +24,9 @@ interface JobContentProps {
   processId: TProcessId
 }
 
-function downloadTemplate(processId: TProcessId) {
+function downloadTemplate(processId: TProcessId, name: string) {
   const headers = Object.keys(uploadSchemas[processId].shape)
-  const wbName = `${PROCESS_COPY[processId].name} Template.xlsx`
+  const wbName = `${name} Template.xlsx`
 
   const ws = XLSX.utils.json_to_sheet([headers])
   const wb = XLSX.utils.book_new()
@@ -34,10 +35,14 @@ function downloadTemplate(processId: TProcessId) {
 }
 
 export function JobContent({ processId }: JobContentProps): React.JSX.Element {
-  const { name, desc } = PROCESS_COPY[processId]
+  const { data, isLoading } = trpc.process.fetchProcesses.useQuery()
+
+  if (isLoading || !data) return <></>
+
+  const { name, desc } = data.find((process) => process.id === processId)! // WatchMe: Bang Operator Used
 
   const handleTemplateDownload = () => {
-    downloadTemplate(processId)
+    downloadTemplate(processId, name)
   }
 
   return (

@@ -50,6 +50,16 @@ export const ZPenguinRow = z.object({
 })
 export type TPenguinRow = z.infer<typeof ZPenguinRow>
 
+export const ZAutomateNowRow = z.object({
+  name: z.string().min(1),
+  password: z.string().min(1),
+  favDrink: z.enum(['Water', 'Milk', 'Coffee', 'Wine', 'Ctrl-Alt-Delight']),
+  favColor: z.enum(['Red', 'Blue', 'Yellow', 'Green', '#FFC0CB']),
+  likesAutomation: z.enum(['Yes', 'No', 'Undecided']),
+  email: z.email(),
+  message: z.string()
+})
+
 export const uploadSchemas = {
   calveRecip: ZCalveRecipRow,
   breedRecip: ZBreedRecipRow,

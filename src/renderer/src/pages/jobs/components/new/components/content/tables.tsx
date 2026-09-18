@@ -9,17 +9,17 @@ import {
 } from '@renderer/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { isDate } from '@renderer/lib/strings'
-import { PROCESS_COPY } from '@shared/resources/strings'
 import type { TProcessId } from '@shared/schemas/jobs'
 import { uploadSchemas } from '@shared/schemas/jobs/upload'
 import React from 'react'
+import { exampleRows } from './_copy'
 
 interface ExampleDataTableProps {
   processId: TProcessId
 }
 
 export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JSX.Element {
-  const exampleRows = PROCESS_COPY[processId].exampleData
+  const rows = exampleRows[processId]
   return (
     <div className="border-border rounded-md border">
       <Table className="table-fixed text-xs">
@@ -38,7 +38,7 @@ export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JS
         </TableCaption>
         <TableHeader className="bg-muted/80">
           <TableRow>
-            {Object.keys(exampleRows[0]).map((k) => (
+            {Object.keys(rows[0]).map((k) => (
               <TableHead key={k} className="truncate">
                 {k}
               </TableHead>
@@ -46,7 +46,7 @@ export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JS
           </TableRow>
         </TableHeader>
         <TableBody>
-          {exampleRows.map((r, i) => (
+          {rows.map((r, i) => (
             <TableRow key={i}>
               {Object.values(r).map((v, k) => {
                 let display = v
