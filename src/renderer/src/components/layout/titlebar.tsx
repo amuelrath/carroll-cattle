@@ -1,5 +1,5 @@
-import { capitalize } from '@renderer/lib/strings'
 import { trpc } from '@renderer/lib/trpc'
+import { capitalize } from '@shared/lib/strings'
 import { useRouterState } from '@tanstack/react-router'
 import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, SquareIcon, XIcon } from 'lucide-react'
 import React from 'react'
