@@ -41,6 +41,7 @@ const itemVariants = cva(
         muted: 'border-transparent bg-muted/50'
       },
       size: {
+        lg: 'gap-6 px-6.5 py-6',
         md: 'gap-3 px-3.5 py-3',
         default: 'gap-2.5 px-3 py-2.5',
         sm: 'gap-2.5 px-3 py-2.5',
