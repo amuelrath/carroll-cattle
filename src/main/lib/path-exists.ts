@@ -6,7 +6,7 @@ import { existsSync } from 'node:fs'
 export function pathExists({ filePath }: { filePath: string }): Result<void, NotFoundError> {
   if (!existsSync(filePath)) {
     return err(
-      new NotFoundError(`Path "${filePath}" doesn't exist. Did the file move?`, {
+      new NotFoundError(`Path "${filePath}" doesn't exist.`, {
         toast: errors.pathNotFound
       })
     )
