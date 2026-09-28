@@ -1,3 +1,4 @@
+import { Page, PageContent, PageSidebar } from '@renderer/components/common/page'
 import { Tabs } from '@renderer/components/ui/tabs'
 import type { TProcessId } from '@shared/schemas/jobs'
 import { useNavigate, useSearch } from '@tanstack/react-router'
@@ -10,17 +11,23 @@ export function NewJobPage(): React.JSX.Element {
   const navigate = useNavigate({ from: '/jobs/new/' })
 
   const handleTabChange = async (tabId: TProcessId) => {
-    await navigate({ search: (prev) => ({ ...prev, processId: tabId }) })
+    await navigate({ search: (prev) => ({ ...prev, processId: tabId }), replace: true })
   }
   return (
-    <Tabs
-      value={processId}
-      onValueChange={handleTabChange}
-      className="h-full gap-0"
-      orientation="vertical"
-    >
-      <JobSidebar />
-      <JobContent processId={processId} />
-    </Tabs>
+    <Page>
+      <Tabs
+        value={processId}
+        onValueChange={handleTabChange}
+        className="w-full gap-0"
+        orientation="vertical"
+      >
+        <PageSidebar>
+          <JobSidebar />
+        </PageSidebar>
+        <PageContent>
+          <JobContent processId={processId} />
+        </PageContent>
+      </Tabs>
+    </Page>
   )
 }

@@ -1,11 +1,18 @@
+import {
+  Page,
+  PageContent,
+  PageSidebar,
+  PageTitlebar,
+  PageTitlebarButtonGroup
+} from '@renderer/components/common/page'
 import { Button } from '@renderer/components/ui/button'
 import { toast } from '@renderer/components/ui/toast'
 import { iconSizes } from '@renderer/lib/tokens'
 import { trpc } from '@renderer/lib/trpc'
-import { useCreateJobMutation } from '@renderer/pages/jobs/hooks/use-create-job-mutation'
 import { useSearch } from '@tanstack/react-router'
 import { ExternalLinkIcon, RefreshCcwIcon } from 'lucide-react'
-import React, { useCallback, useEffect, useRef } from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
+import { useCreateJobMutation } from '../../hooks/use-create-job-mutation'
 import { sheetCopy as copy } from './_copy'
 import { ExplanationDialog } from './components/explanation-dialog'
 import { SheetTable } from './components/sheet'
@@ -13,6 +20,8 @@ import { Sidebar } from './components/sidebar'
 
 export function ValidatePage(): React.JSX.Element {
   const isFirstRender = useRef(true)
+  const scrollRef = useRef<HTMLDivElement | null>(null)
+  const [isScrollAtTop, setIsScrollAtTop] = useState(true)
   const { filePath, sheetName, columnMap, processId } = useSearch({ from: '/jobs/validate/' })
   const { mutateCreateJob } = useCreateJobMutation()
   const { mutateAsync: mutateOpenPath } = trpc.system.openPath.useMutation()
@@ -71,14 +80,20 @@ export function ValidatePage(): React.JSX.Element {
     return () => window.removeEventListener('focus', handleFocus)
   }, [filePath, sheetName, refresh, refetchSheet])
 
+  // for handling scroll style on sticky table header
+  const handleScroll = useCallback(() => {
+    const atTop = (scrollRef.current?.scrollTop ?? 0) === 0
+    setIsScrollAtTop((prev) => (prev === atTop ? prev : atTop))
+  }, [])
+
   const showTable = sheet && validationRes
 
   return (
-    <div className="flex h-full flex-row outline">
-      <div className="flex flex-1 flex-col">
-        <div className="flex h-14 flex-row items-center justify-between border-r p-2">
-          <p className="text-base font-semibold">{sheetName}</p>
-          <div className="flex justify-center space-x-1.5">
+    <Page>
+      <PageContent>
+        <PageTitlebar className="border-r">
+          <p className="">{sheetName}</p>
+          <PageTitlebarButtonGroup>
             <ExplanationDialog onContinue={handleContinue} validation={validationRes} />
             <Button variant="secondary" size="sm" onClick={handleRefreshClick}>
               <RefreshCcwIcon {...iconSizes.small} />
@@ -86,11 +101,21 @@ export function ValidatePage(): React.JSX.Element {
             <Button variant="secondary" size="sm" onClick={handleOpenClick}>
               <ExternalLinkIcon {...iconSizes.small} />
             </Button>
-          </div>
-        </div>
-        {showTable && <SheetTable sheet={sheet} validation={validationRes} />}
-      </div>
-      <Sidebar onContinue={handleContinue} validation={validationRes} />
-    </div>
+          </PageTitlebarButtonGroup>
+        </PageTitlebar>
+        <PageContent
+          ref={scrollRef}
+          onScroll={handleScroll}
+          className="no-scrollbar relative flex min-h-0 flex-1 overflow-y-scroll"
+        >
+          {showTable && (
+            <SheetTable sheet={sheet} validation={validationRes} isScrollAtTop={isScrollAtTop} />
+          )}
+        </PageContent>
+      </PageContent>
+      <PageSidebar className="bg-muted">
+        <Sidebar onContinue={handleContinue} validation={validationRes} />
+      </PageSidebar>
+    </Page>
   )
 }

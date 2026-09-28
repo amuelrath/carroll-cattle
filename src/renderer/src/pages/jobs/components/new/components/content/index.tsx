@@ -1,3 +1,4 @@
+import { PageTitlebar, PageTitlebarButtonGroup } from '@renderer/components/common/page'
 import {
   Accordion,
   AccordionContent,
@@ -6,13 +7,11 @@ import {
 } from '@renderer/components/ui/accordion'
 import { Button } from '@renderer/components/ui/button'
 import { Item, ItemContent, ItemDescription } from '@renderer/components/ui/item'
-import { Separator } from '@renderer/components/ui/separator'
 import { TabsContent } from '@renderer/components/ui/tabs'
 import { iconSizes } from '@renderer/lib/tokens'
 import { trpc } from '@renderer/lib/trpc'
 
-import type { TProcessId } from '@shared/schemas/jobs'
-import { uploadSchemas } from '@shared/schemas/jobs/upload'
+import { type TProcessId, uploadSchemas } from '@shared/schemas/jobs'
 import { DownloadIcon } from 'lucide-react'
 import React from 'react'
 import * as XLSX from 'xlsx'
@@ -28,7 +27,7 @@ function downloadTemplate(processId: TProcessId, name: string) {
   const headers = Object.keys(uploadSchemas[processId].shape)
   const wbName = `${name} Template.xlsx`
 
-  const ws = XLSX.utils.json_to_sheet([headers])
+  const ws = XLSX.utils.aoa_to_sheet([headers])
   const wb = XLSX.utils.book_new()
   XLSX.utils.book_append_sheet(wb, ws, 'Template')
   XLSX.writeFile(wb, wbName)
@@ -49,20 +48,21 @@ export function JobContent({ processId }: JobContentProps): React.JSX.Element {
     <TabsContent
       key={processId}
       value={processId}
-      className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden p-2"
+      className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden"
     >
-      <div className="flex flex-row items-center justify-between">
-        <div className="max-h-10">
-          <h2 className="text-md font-medium">{name}</h2>
-          <p className="text-muted-foreground">{desc}</p>
+      <PageTitlebar>
+        <div>
+          <p>{name}</p>
+          <p className="text-muted-foreground text-sm font-normal">{desc}</p>
         </div>
-        <Button size="sm" variant="secondary" onClick={handleTemplateDownload}>
-          <DownloadIcon size={iconSizes.small.size} strokeWidth={iconSizes.small.strokeWidth} />
-          {copy.downloadTemplate}
-        </Button>
-      </div>
-      <Separator className="my-2" />
-      <div className="flex min-h-0 flex-1 flex-col gap-4">
+        <PageTitlebarButtonGroup>
+          <Button size="sm" variant="secondary" onClick={handleTemplateDownload}>
+            <DownloadIcon size={iconSizes.small.size} strokeWidth={iconSizes.small.strokeWidth} />
+            {copy.downloadTemplate}
+          </Button>
+        </PageTitlebarButtonGroup>
+      </PageTitlebar>
+      <div className="flex min-h-0 flex-1 flex-col gap-4 p-2">
         <FileUpload />
         <Item variant="muted">
           <ItemContent>
@@ -70,6 +70,7 @@ export function JobContent({ processId }: JobContentProps): React.JSX.Element {
           </ItemContent>
         </Item>
         <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+          {/* if there is no value, entire content layout width shifts */}
           <Accordion defaultValue={['example-data']}>
             <AccordionItem value="example-data">
               <AccordionTrigger>{copy.exampleData}</AccordionTrigger>
