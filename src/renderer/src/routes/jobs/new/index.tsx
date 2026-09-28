@@ -5,7 +5,7 @@ import React from 'react'
 import { z } from 'zod'
 
 const ZProcedureSearch = z.object({
-  processId: ZProcessId.default('penguins')
+  processId: ZProcessId.default('pregCheck')
 })
 
 export const Route = createFileRoute('/jobs/new/')({
