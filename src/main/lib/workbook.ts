@@ -18,7 +18,7 @@ export function getSheetErrors({
   columnMap
 }: {
   mappedSheet: TFetchSheetResponse['rows']
-  schema: z.ZodObject
+  schema: z.ZodType
   columnMap: TValidateSheetInput['columnMap']
 }): TValidateSheetResponse {
   const cellErrs: TValidateSheetErrorResponse['errors'] = []
@@ -56,8 +56,8 @@ export function readWorkbook({
   filePath: string
 }): Result<XLSX.WorkBook, SheetError> {
   return Result.fromThrowable(
-    () => XLSX.readFile(filePath),
-    (e) => new SheetError(`File couldn't be read.`, { cause: e, toast: errors.unreadableFile })
+    () => XLSX.readFile(filePath, { cellDates: true, raw: false }),
+    (cause) => new SheetError(`File couldn't be read.`, { cause, toast: errors.unreadableFile })
   )()
 }
 
@@ -71,7 +71,9 @@ export function getSheet({
   const sheet = workbook.Sheets[sheetName]
   return XLSX.utils.sheet_to_json(sheet, {
     defval: '',
-    blankrows: true
+    blankrows: true,
+    raw: false,
+    dateNF: 'mm-dd-yyyy'
   }) as TFetchSheetResponse['rows']
 }
 
@@ -83,7 +85,7 @@ export function getWorkbookSheetNamesAndHeads({
   return workbook.SheetNames.map((sheetName) => {
     const sheet = workbook.Sheets[sheetName]
     const rows = XLSX.utils
-      .sheet_to_json(sheet, { defval: '', blankrows: true })
+      .sheet_to_json(sheet, { defval: '', blankrows: true, raw: false, dateNF: 'mm-dd-yyyy' })
       .slice(0, 8) as TSheetPreviewResponse['sheets'][number]['headRows']
     const headRows = rows && rows.length > 0 ? rows : null
     return { sheetName, headRows }
