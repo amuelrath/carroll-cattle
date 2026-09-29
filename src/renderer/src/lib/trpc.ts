@@ -41,7 +41,11 @@ const responseLink: TRPCLink<AppRouter> = () => {
   }
 }
 
+const links: TRPCLink<AppRouter>[] = [responseLink, ipcLink({ transformer: superjson })]
+
 export const trpc = createTRPCReact<AppRouter>()
 export const trpcClient = trpc.createClient({
-  links: [responseLink, ipcLink({ transformer: superjson })]
+  links
 })
+
+export const trpcVanilla = createTRPCClient<AppRouter>({ links })
