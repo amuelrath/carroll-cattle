@@ -17,19 +17,20 @@ const responseLink: TRPCLink<AppRouter> = () => {
           observer.next(value)
         },
         error(err) {
+          console.error('[responseLink]', op.path, op.type, err, err.cause)
           toast.add({
             type: 'error',
             description: err.data?.toast ?? errors.unknown
           })
 
           logger.error({
-            process: '[main]',
+            process: '[main]', // todo uhh it doesn't always come from main. main just catches it.
             call: `[${source}]`,
             type: err.data?.type,
             params: JSON.stringify(op.input),
             message: err.message,
-            cause: err.cause,
-            stack: err.stack
+            cause: err.data?.causes
+            // stack: err.stack
           })
           observer.error(err)
         },
@@ -47,5 +48,3 @@ export const trpc = createTRPCReact<AppRouter>()
 export const trpcClient = trpc.createClient({
   links
 })
-
-export const trpcVanilla = createTRPCClient<AppRouter>({ links })
