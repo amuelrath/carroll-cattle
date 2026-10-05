@@ -71,7 +71,7 @@ export function PageTitlebar({ children, className }: PageTitlebarProps) {
     <div
       data-slot="titlebar"
       className={cn(
-        'flex h-14 w-full border-b px-4 py-1.5 text-base font-semibold',
+        'flex max-h-14 min-h-14 w-full border-b px-4 py-1.5 text-base font-semibold',
         'has-data-[slot=button-group]:flex-row has-data-[slot=button-group]:items-center has-data-[slot=button-group]:justify-between',
         className
       )}
@@ -88,7 +88,10 @@ interface PageTitlebarButtonGroupProps {
 
 export function PageTitlebarButtonGroup({ children, className }: PageTitlebarButtonGroupProps) {
   return (
-    <div data-slot="button-group" className={cn('space-x-1.5', className)}>
+    <div
+      data-slot="button-group"
+      className={cn('flex flex-row items-center space-x-1.5 space-x-2', className)}
+    >
       {children}
     </div>
   )
