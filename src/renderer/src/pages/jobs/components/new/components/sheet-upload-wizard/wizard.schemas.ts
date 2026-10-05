@@ -1,5 +1,4 @@
-import type { TProcessId } from '@shared/schemas/jobs'
-import { uploadSchemas } from '@shared/schemas/jobs/upload'
+import { type TProcessId, uploadSchemas } from '@shared/schemas/jobs'
 import { z } from 'zod'
 
 export const ZStepOne = z.object({
