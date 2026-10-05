@@ -26,7 +26,8 @@ export default defineConfig({
   preload: {
     resolve: {
       alias: {
-        '@shared': resolve('src/shared')
+        '@shared': resolve('src/shared'),
+        '@preload': resolve('src/preload')
       }
     },
     build: {
