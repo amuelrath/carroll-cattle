@@ -31,10 +31,10 @@ export function Sidebar({
   const groupedErrors = Object.groupBy(errors, (err) => err.rowIdx)
 
   return (
-    <aside className="border-border bg-muted scrollbar-track-muted scrollbar-thumb-muted-foreground flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden overflow-y-scroll">
+    <div className="scrollbar-track-muted scrollbar-thumb-muted-foreground flex-1 overflow-y-scroll">
       <div className="flex min-w-0 grow flex-col space-y-2 p-2">
         <AnimatePresence mode="popLayout">
-          {errors.length > 0 ? (
+          {errors.length > 0 ?
             Object.entries(groupedErrors).map(([group, errs]) => (
               <div key={group} className="flex min-w-0 flex-col gap-1 overflow-hidden">
                 <span className="text-muted-foreground text-xs font-bold">
@@ -51,8 +51,7 @@ export function Sidebar({
                 <hr />
               </div>
             ))
-          ) : (
-            <div className="flex grow flex-col items-center justify-center">
+          : <div className="flex grow flex-col items-center justify-center">
               <motion.span
                 initial={{ opacity: 0, scaleX: 0, scaleY: 0 }}
                 animate={{ opacity: 1, scaleX: 1, scaleY: 1 }}
@@ -61,10 +60,10 @@ export function Sidebar({
                 <ValidDialog onContinue={onContinue} />
               </motion.span>
             </div>
-          )}
+          }
         </AnimatePresence>
       </div>
-    </aside>
+    </div>
   )
 }
 
