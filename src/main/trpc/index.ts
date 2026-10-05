@@ -1,5 +1,7 @@
+import { automationRouter } from './routers/automation'
 import { dialogRouter } from './routers/dialog'
 import { jobRouter } from './routers/job'
+import { processRouter } from './routers/process'
 import { sheetRouter } from './routers/sheet'
 import { systemRouter } from './routers/system'
 import { windowRouter } from './routers/window'
@@ -10,7 +12,9 @@ export const appRouter = router({
   dialog: dialogRouter,
   sheet: sheetRouter,
   system: systemRouter,
-  job: jobRouter
+  job: jobRouter,
+  process: processRouter,
+  automation: automationRouter
 })
 
 export type AppRouter = typeof appRouter
