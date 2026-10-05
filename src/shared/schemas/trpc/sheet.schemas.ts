@@ -1,5 +1,4 @@
-import { ZProcessId } from '@shared/schemas/jobs'
-import { uploadSchemas } from '@shared/schemas/jobs/upload'
+import { uploadSchemas, ZProcessId } from '@shared/schemas/jobs'
 import { z } from 'zod'
 
 export const ZPreviewSheetInput = z.object({

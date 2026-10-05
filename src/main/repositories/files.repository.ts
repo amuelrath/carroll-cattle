@@ -6,11 +6,10 @@ import type { TValidateSheetSuccessResponse } from '@shared/schemas/trpc'
 import { eq } from 'drizzle-orm'
 import { ResultAsync } from 'neverthrow'
 
-export class FilesDbService {
+export class FilesRepository {
   constructor(private db: DrizzleDb) {}
 
-  createFileWithRows(input: { file: TInsertFile; rows: TValidateSheetSuccessResponse['sheet'] }) {
-    const { file, rows } = input
+  createFileWithRows(file: TInsertFile, rows: TValidateSheetSuccessResponse['sheet']) {
     return ResultAsync.fromPromise(
       this.db.transaction(async (tx) => {
         const { id: fileId } = await tx

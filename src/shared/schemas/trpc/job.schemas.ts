@@ -1,4 +1,13 @@
-import { ZJobKey } from '@shared/schemas/jobs'
+import {
+  ZSelectFile,
+  ZSelectFileRow,
+  ZSelectJob,
+  ZSelectProcess,
+  ZSelectTask,
+  ZSelectTaskIssue,
+  ZSelectTaskProof
+} from '@shared/db/schema'
+import { ZProcessId } from '@shared/schemas/jobs'
 import { z } from 'zod'
 
 export const ZCreateJobInput = z.object({
@@ -13,3 +22,30 @@ export const ZCreateJobResponse = z.object({
   jobId: z.number()
 })
 export type TCreateJobResponse = z.infer<typeof ZCreateJobResponse>
+
+export const ZGetJobWithTasksInput = z.object({
+  jobId: z.number()
+})
+export type TGetJobWithTasksInput = z.infer<typeof ZGetJobWithTasksInput>
+
+export const ZGetJobWithTasksResponse = ZSelectJob.extend({
+  process: ZSelectProcess,
+  tasks: z.array(
+    ZSelectTask.extend({
+      row: ZSelectFileRow,
+      proof: ZSelectTaskProof.optional().nullable(),
+      issues: ZSelectTaskIssue.optional().nullable()
+    })
+  )
+})
+export type TGetJobWithTasksResponse = z.infer<typeof ZGetJobWithTasksResponse>
+
+export const ZGetAllJobsWithProcessAndFileResponse = z.array(
+  ZSelectJob.extend({
+    process: ZSelectProcess,
+    file: ZSelectFile
+  })
+)
+export type TGetAllJobsWithProcessAndFileResponse = z.infer<
+  typeof ZGetAllJobsWithProcessAndFileResponse
+>
