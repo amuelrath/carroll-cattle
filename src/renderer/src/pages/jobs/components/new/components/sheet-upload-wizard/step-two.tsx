@@ -7,9 +7,9 @@ import {
   SelectTrigger,
   SelectValue
 } from '@renderer/components/ui/select'
-import { normalize } from '@renderer/lib/strings'
 import { iconSizes } from '@renderer/lib/tokens'
 import { cn } from '@renderer/lib/utils'
+import { normalize } from '@shared/lib/strings'
 import { useSearch } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { ArrowRightIcon, SparkleIcon } from 'lucide-react'
