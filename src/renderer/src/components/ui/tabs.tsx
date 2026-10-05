@@ -1,9 +1,12 @@
 'use client'
 
 import { Tabs as TabsPrimitive } from '@base-ui/react/tabs'
+import { iconSizes } from '@renderer/lib/tokens'
 
 import { cn } from '@renderer/lib/utils'
 import { cva, type VariantProps } from 'class-variance-authority'
+import type { LucideIcon } from 'lucide-react'
+import React from 'react'
 
 function Tabs({ className, orientation = 'horizontal', ...props }: TabsPrimitive.Root.Props) {
   return (
@@ -72,4 +75,35 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, tabsListVariants }
+interface CustomTabTriggerProps {
+  value: string
+  Icon: LucideIcon
+  label: string
+  children?: React.ReactNode
+}
+
+function CustomTabTrigger({
+  value,
+  Icon,
+  label,
+  children
+}: CustomTabTriggerProps): React.JSX.Element {
+  return (
+    <TabsTrigger className="group/trigger flex flex-row items-center justify-between" value={value}>
+      <div className="flex flex-row items-center space-x-2">
+        <div className="relative items-center justify-center">
+          <span className="bg-muted group-data-active/trigger:border-border absolute -top-1 -left-1 size-6 rounded-full group-data-active/trigger:border group-data-active/trigger:bg-white" />
+          <Icon
+            className="group-data-active/trigger:text-primary relative z-10"
+            size={iconSizes.medium.size}
+            strokeWidth={iconSizes.medium.strokeWidth}
+          />
+        </div>
+        <span>{label}</span>
+      </div>
+      {children}
+    </TabsTrigger>
+  )
+}
+
+export { Tabs, TabsList, TabsTrigger, TabsContent, CustomTabTrigger, tabsListVariants }
