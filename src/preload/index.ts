@@ -1,4 +1,5 @@
 import { electronAPI } from '@electron-toolkit/preload'
+import { api } from '@preload/ipc'
 import { contextBridge } from 'electron'
 import { exposeElectronTRPC } from 'trpc-electron/main'
 
@@ -10,6 +11,7 @@ import { exposeElectronTRPC } from 'trpc-electron/main'
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
+    contextBridge.exposeInMainWorld('api', api)
   } catch (error) {
     console.error(error)
   }
