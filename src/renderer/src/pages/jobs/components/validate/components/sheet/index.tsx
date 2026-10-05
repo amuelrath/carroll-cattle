@@ -6,8 +6,10 @@ import {
   TableHeader,
   TableRow
 } from '@renderer/components/ui/table'
+import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { cn } from '@renderer/lib/utils'
 import { TFetchSheetResponse, type TValidateSheetResponse } from '@shared/schemas/trpc'
+import { useSearch } from '@tanstack/react-router'
 import { AnimatePresence, motion } from 'framer-motion'
 import React, { useCallback } from 'react'
 import { getCellId, useCellActions, useIsCellActive } from '../../hooks/store'
@@ -18,7 +20,12 @@ interface SheetTableProps {
   validation: TValidateSheetResponse
 }
 
-export function SheetTable({ sheet, validation }: SheetTableProps) {
+// ToDo: If an entire column has errors, the user probably mapped it wrong.
+// Include some extra info in the explanation dialog which explains this and
+// tells them what to do. (re upload, or maybe build in a remap?)
+export function SheetTable({ sheet, validation, isScrollAtTop }: SheetTableProps) {
+  const { columnMap } = useSearch({ from: '/jobs/validate/' })
+
   const { handleMouseEnter, handleMouseLeave, cellRefs } = useScrolljacker({
     for: 'table'
   })
@@ -33,7 +40,7 @@ export function SheetTable({ sheet, validation }: SheetTableProps) {
   const errors = validation.status === 'invalid' ? validation.errors : undefined
 
   if (!sheet || sheet.rows.length === 0) return <p>err! no rows</p>
-  const rows = sheet.rows as Record<string, unknown>[]
+  const rows = sheet.rows
 
   return (
     <div
@@ -52,10 +59,12 @@ export function SheetTable({ sheet, validation }: SheetTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {rows.map((r, rowIdx) => (
+          {rows.map((row, rowIdx) => (
             <TableRow key={`row-${rowIdx}`}>
-              {Object.values(r).map((v, colIdx) => {
-                const columnName = Object.keys(r)[colIdx]
+              {Object.values(row).map((v, colIdx) => {
+                const columnName = Object.keys(row)[colIdx]
+                // only include columns that got mapped
+                if (!Object.values(columnMap).includes(columnName)) return <></>
                 const err = errors?.find((e) => e.rowIdx === rowIdx && e.columnName === columnName)
                 const cellId = getCellId({ rowIdx, columnName })
 

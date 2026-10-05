@@ -22,32 +22,31 @@ export function getSheetErrors({
   columnMap: TValidateSheetInput['columnMap']
 }): TValidateSheetResponse {
   const cellErrs: TValidateSheetErrorResponse['errors'] = []
+  const parsedRows: TFetchSheetResponse['rows'] = []
+
   mappedSheet.forEach((row, rowIdx) => {
-    const { error } = schema.safeParse(row)
-    if (!error) return
+    const result = schema.safeParse(row)
 
-    const errs: TValidateSheetErrorResponse['errors'] = error.issues.map((iss) => {
-      const targetKey = iss.path[0] as string
-
-      return {
-        rowIdx,
-        columnName: columnMap[targetKey] ?? targetKey,
-        detail: getIssueDetails(iss)
-      }
-    })
-    return cellErrs.push(...errs)
-  })
-
-  if (cellErrs.length > 0)
-    return {
-      status: 'invalid',
-      errors: cellErrs
+    if (result.success) {
+      parsedRows.push(result.data as Record<string, unknown>)
+      return
     }
 
-  return {
-    status: 'valid',
-    sheet: mappedSheet
-  }
+    cellErrs.push(
+      ...result.error.issues.map((iss) => {
+        const targetKey = iss.path[0] as string
+        return {
+          rowIdx,
+          columnName: columnMap[targetKey] ?? targetKey,
+          detail: getIssueDetails(iss)
+        }
+      })
+    )
+  })
+
+  if (cellErrs.length > 0) return { status: 'invalid', errors: cellErrs }
+
+  return { status: 'valid', sheet: parsedRows }
 }
 
 export function readWorkbook({
