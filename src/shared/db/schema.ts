@@ -1,134 +1,136 @@
+import type { TProcessId } from '@shared/schemas/jobs'
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { defineRelations } from 'drizzle-orm/relations'
 import { foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
-import { TProcess } from '../schemas/process'
+import { createSelectSchema } from 'drizzle-orm/zod'
+import { z } from 'zod'
 
-export type TValidationStatus = 'valid' | 'invalid'
-export type TRowValidationError = 'dateTypeMismatch' | 'missing'
-export type TActionError = 'dataError' | 'missingProfile' | 'networkError'
-export type TActionStatus = 'pending' | 'running' | 'success' | 'failed'
+export type TJobStatus = 'active' | 'inactive' | 'paused'
+export type TTaskStatus = 'done' | 'notDone'
 
 export const processes = sqliteTable('processes', {
-  id: text().primaryKey().$type<TProcess>(),
+  id: text().primaryKey().$type<TProcessId>(),
   name: text().notNull(),
   desc: text().notNull()
 })
 export type TSelectProcess = InferSelectModel<typeof processes>
 export type TInsertProcess = InferInsertModel<typeof processes>
+export const ZSelectProcess = createSelectSchema(processes)
 
+// MaybeToDo: Add sha256 hash to guard against duplicate sheet uploads?
 export const files = sqliteTable('files', {
   id: int().primaryKey({ autoIncrement: true }),
-  filename: text().notNull(),
-  storagePath: text().notNull(),
-  sha256: text().notNull(),
+  fileName: text().notNull(),
+  sheetName: text().notNull(),
   uploadedAt: int({ mode: 'timestamp_ms' })
     .notNull()
-    .$defaultFn(() => new Date()),
-  status: text().$type<TValidationStatus>().notNull()
+    .$defaultFn(() => new Date())
 })
 export type TSelectFile = InferSelectModel<typeof files>
 export type TInsertFile = InferInsertModel<typeof files>
+export const ZSelectFile = createSelectSchema(files)
 
 export const fileRows = sqliteTable(
   'fileRows',
   {
     fileId: int()
       .notNull()
-      .references(() => files.id),
-    rowNum: int().notNull(),
-    rawJson: text({ mode: 'json' }).notNull(),
-    parsedJson: text({ mode: 'json' }).notNull(),
-    status: text().$type<TValidationStatus>().notNull()
+      .references(() => files.id, { onDelete: 'cascade' }),
+    rowIdx: int().notNull(),
+    json: text({ mode: 'json' }).notNull()
   },
-  (t) => [primaryKey({ columns: [t.fileId, t.rowNum] })]
+  (t) => [primaryKey({ columns: [t.fileId, t.rowIdx] })]
 )
 export type TSelectFileRow = InferSelectModel<typeof fileRows>
 export type TInsertFileRow = InferInsertModel<typeof fileRows>
-
-export const fileErrors = sqliteTable(
-  'fileErrors',
-  {
-    fileId: int().notNull(),
-    rowNum: int().notNull(),
-    colName: text().notNull(),
-    errorType: text().notNull().$type<TRowValidationError>()
-  },
-  (t) => [
-    primaryKey({ columns: [t.fileId, t.rowNum, t.colName] }),
-    foreignKey({
-      columns: [t.fileId, t.rowNum],
-      foreignColumns: [fileRows.fileId, fileRows.rowNum]
-    })
-  ]
-)
-export type TSelectFileError = InferSelectModel<typeof fileErrors>
-export type TInsertFileError = InferInsertModel<typeof fileErrors>
+export const ZSelectFileRow = createSelectSchema(fileRows, {
+  json: z.unknown()
+})
 
 export const jobs = sqliteTable('jobs', {
   id: int().primaryKey({ autoIncrement: true }),
+  status: text().$type<TJobStatus>().notNull().default('inactive'),
   processId: text()
     .notNull()
     .references(() => processes.id)
-    .$type<TProcess>(),
+    .$type<TProcessId>(),
   fileId: int()
     .notNull()
-    .references(() => files.id),
-  startedAt: int({ mode: 'timestamp_ms' })
+    .references(() => files.id, { onDelete: 'cascade' }),
+  createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
+  startedAt: int({ mode: 'timestamp_ms' }),
   completedAt: int({ mode: 'timestamp_ms' })
 })
 export type TSelectJob = InferSelectModel<typeof jobs>
 export type TInsertJob = InferInsertModel<typeof jobs>
+export const ZSelectJob = createSelectSchema(jobs)
 
-export const actions = sqliteTable(
-  'actions',
+export const tasks = sqliteTable(
+  'tasks',
   {
     id: int().primaryKey({ autoIncrement: true }),
     jobId: int()
       .notNull()
-      .references(() => jobs.id),
-    fileId: int().notNull(),
-    rowNum: int().notNull(),
-    status: text().$type<TActionStatus>().notNull().default('pending'),
-    startedAt: int({ mode: 'timestamp_ms' })
+      .references(() => jobs.id, { onDelete: 'cascade' }),
+    fileId: int()
+      .notNull()
+      .references(() => files.id, { onDelete: 'cascade' }),
+    rowIdx: int().notNull(),
+    createdAt: int({ mode: 'timestamp_ms' })
       .notNull()
       .$defaultFn(() => new Date()),
+    status: text().$type<TTaskStatus>().notNull().default('notDone'),
+    startedAt: int({ mode: 'timestamp_ms' }),
     completedAt: int({ mode: 'timestamp_ms' })
   },
   (t) => [
+    // fileId intentionally denormalized so we can derive FK
     foreignKey({
-      columns: [t.fileId, t.rowNum],
-      foreignColumns: [fileRows.fileId, fileRows.rowNum]
+      columns: [t.fileId, t.rowIdx],
+      foreignColumns: [fileRows.fileId, fileRows.rowIdx]
     })
   ]
 )
-export type TSelectAction = InferSelectModel<typeof actions>
-export type TInsertAction = InferInsertModel<typeof actions>
+export type TSelectTask = InferSelectModel<typeof tasks>
+export type TInsertTask = InferInsertModel<typeof tasks>
+export const ZSelectTask = createSelectSchema(tasks)
 
-export const actionErrors = sqliteTable('actionErrors', {
-  id: int().primaryKey({ autoIncrement: true }),
-  actionId: int()
-    .notNull()
-    .references(() => actions.id),
-  errorType: text().notNull().$type<TActionError>(),
-  message: text(),
+export const taskProofs = sqliteTable('taskProofs', {
+  taskId: int()
+    .primaryKey()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  imgBase64: text().notNull(),
+  createdAt: int({ mode: 'timestamp_ms' }).$defaultFn(() => new Date())
+})
+export type TSelectTaskProof = InferSelectModel<typeof taskProofs>
+export type TInsertTaskProof = InferInsertModel<typeof taskProofs>
+export const ZSelectTaskProof = createSelectSchema(taskProofs)
+
+export const taskIssues = sqliteTable('taskIssues', {
+  taskId: int()
+    .primaryKey()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  imgBase64: text().notNull(),
+  desc: text().notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date())
 })
-export type TSelectActionError = InferSelectModel<typeof actionErrors>
-export type TInsertActionError = InferInsertModel<typeof actionErrors>
+export type TSelectTaskIssue = InferSelectModel<typeof taskIssues>
+export type TInsertTaskIssue = InferInsertModel<typeof taskIssues>
+export const ZSelectTaskIssue = createSelectSchema(taskIssues)
 
 export const relations = defineRelations(
   {
     processes,
     jobs,
-    actions,
-    actionErrors,
     files,
     fileRows,
-    fileErrors
+    tasks,
+    taskIssues,
+    taskProofs
   },
   (r) => ({
     jobs: {
@@ -140,9 +142,9 @@ export const relations = defineRelations(
         from: r.jobs.fileId,
         to: r.files.id
       }),
-      actions: r.many.actions({
+      tasks: r.many.tasks({
         from: r.jobs.id,
-        to: r.actions.jobId
+        to: r.tasks.jobId
       })
     },
     files: {
@@ -159,40 +161,36 @@ export const relations = defineRelations(
       file: r.one.files({
         from: r.fileRows.fileId,
         to: r.files.id
-      }),
-      errors: r.many.fileErrors({
-        from: [r.fileRows.fileId, r.fileRows.rowNum],
-        to: [r.fileErrors.fileId, r.fileErrors.rowNum]
-      }),
-      actions: r.many.actions({
-        from: [r.fileRows.fileId, r.fileRows.rowNum],
-        to: [r.actions.fileId, r.actions.rowNum]
       })
     },
-    fileErrors: {
+    tasks: {
       row: r.one.fileRows({
-        from: [r.fileErrors.fileId, r.fileErrors.rowNum],
-        to: [r.fileRows.fileId, r.fileRows.rowNum]
-      })
-    },
-    actions: {
+        from: [r.tasks.fileId, r.tasks.rowIdx],
+        to: [r.fileRows.fileId, r.fileRows.rowIdx]
+      }),
       job: r.one.jobs({
-        from: r.actions.jobId,
+        from: r.tasks.jobId,
         to: r.jobs.id
       }),
-      row: r.one.fileRows({
-        from: [r.actions.fileId, r.actions.rowNum],
-        to: [r.fileRows.fileId, r.fileRows.rowNum]
+      proof: r.one.taskProofs({
+        from: r.tasks.id,
+        to: r.taskProofs.taskId
       }),
-      errors: r.many.actionErrors({
-        from: r.actions.id,
-        to: r.actionErrors.actionId
+      issues: r.one.taskIssues({
+        from: r.tasks.id,
+        to: r.taskIssues.taskId
       })
     },
-    actionErrors: {
-      action: r.one.actions({
-        from: r.actionErrors.actionId,
-        to: r.actions.id
+    taskProofs: {
+      task: r.one.tasks({
+        from: r.taskProofs.taskId,
+        to: r.tasks.id
+      })
+    },
+    taskIssues: {
+      task: r.one.tasks({
+        from: r.taskIssues.taskId,
+        to: r.tasks.id
       })
     }
   })
