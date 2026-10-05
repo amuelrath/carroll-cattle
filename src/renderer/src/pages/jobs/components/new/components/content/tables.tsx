@@ -8,9 +8,7 @@ import {
   TableRow
 } from '@renderer/components/ui/table'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
-import { isDate } from '@renderer/lib/strings'
-import type { TProcessId } from '@shared/schemas/jobs'
-import { uploadSchemas } from '@shared/schemas/jobs/upload'
+import { type TProcessId, uploadSchemas } from '@shared/schemas/jobs'
 import React from 'react'
 import { exampleRows } from './_copy'
 
@@ -49,20 +47,9 @@ export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JS
           {rows.map((r, i) => (
             <TableRow key={i}>
               {Object.values(r).map((v, k) => {
-                let display = v
-                // if the value is a date, show it in a string format
-                if (isDate(v)) {
-                  const d = v instanceof Date ? v : new Date(v as string)
-                  display = d.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: '2-digit'
-                  })
-                }
-
                 return (
                   <TableCell key={`row-${i}-cell-${k}`} className="truncate">
-                    {String(display)}
+                    {String(v)}
                   </TableCell>
                 )
               })}
