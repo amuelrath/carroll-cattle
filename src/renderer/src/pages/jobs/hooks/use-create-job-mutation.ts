@@ -3,10 +3,12 @@ import { useNavigate } from '@tanstack/react-router'
 
 export function useCreateJobMutation() {
   const navigate = useNavigate()
+  const utils = trpc.useUtils()
 
   const { mutateAsync: mutateCreateJob } = trpc.job.create.useMutation({
     onSuccess: async ({ jobId }) => {
-      await navigate({ to: '/jobs/summary', search: { jobId }, replace: true })
+      await utils.job.fetchAllJobs.invalidate()
+      await navigate({ to: '/jobs/view', search: { jobId }, replace: true })
     }
   })
 
