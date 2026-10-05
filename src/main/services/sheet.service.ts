@@ -7,7 +7,7 @@ import {
   readWorkbook
 } from '@main/lib/workbook'
 import { SheetError, toAppError } from '@shared/errors'
-import { uploadSchemas } from '@shared/schemas/jobs/upload'
+import { uploadSchemas } from '@shared/schemas/jobs'
 import type {
   TFetchSheetInput,
   TFetchSheetResponse,
