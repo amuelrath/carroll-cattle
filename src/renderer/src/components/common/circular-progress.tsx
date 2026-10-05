@@ -1,0 +1,112 @@
+import { cn } from '@renderer/lib/utils'
+import { cva, type VariantProps } from 'class-variance-authority'
+import * as React from 'react'
+
+const VIEWBOX = 100
+const CENTER = VIEWBOX / 2
+
+const circularProgressVariants = cva(
+  'relative transition-colors inline-flex shrink-0 items-center justify-center',
+  {
+    variants: {
+      size: {
+        sm: 'size-6',
+        md: 'size-8',
+        lg: 'size-10',
+        xl: 'size-16'
+      }
+    },
+    defaultVariants: {
+      size: 'lg'
+    }
+  }
+)
+
+const trackVariants = cva('', {
+  variants: {
+    variant: {
+      default: 'stroke-muted-foreground/20',
+      okay: 'stroke-okay',
+      muted: 'stroke-muted-foreground/20'
+    }
+  },
+  defaultVariants: {
+    variant: 'default'
+  }
+})
+
+const indicatorVariants = cva('transition-[stroke-dashoffset] duration-500 ease-out', {
+  variants: {
+    variant: {
+      default: 'stroke-primary',
+      okay: 'stroke-okay-foreground',
+      muted: 'stroke-muted-foreground'
+    }
+  },
+  defaultVariants: {
+    variant: 'default'
+  }
+})
+
+interface CircularProgressProps
+  extends
+    Omit<React.ComponentProps<'div'>, 'children'>,
+    VariantProps<typeof circularProgressVariants>,
+    VariantProps<typeof indicatorVariants> {
+  value?: number
+  /** Stroke width in viewBox units (viewBox is 100×100), scales with size */
+  strokeWidth?: number
+  children?: React.ReactNode
+}
+
+export function CircularProgress({
+  value = 0,
+  size,
+  variant,
+  strokeWidth = 8,
+  className,
+  children,
+  ...props
+}: CircularProgressProps) {
+  const clamped = Math.min(100, Math.max(0, value))
+  const radius = (VIEWBOX - strokeWidth) / 2
+
+  return (
+    <div
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={clamped}
+      className={cn(circularProgressVariants({ size }), className)}
+      {...props}
+    >
+      <svg viewBox={`0 0 ${VIEWBOX} ${VIEWBOX}`} className="size-full -rotate-90">
+        {/* Track */}
+        <circle
+          cx={CENTER}
+          cy={CENTER}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          className={trackVariants({ variant })}
+        />
+        {/* Progress */}
+        <circle
+          cx={CENTER}
+          cy={CENTER}
+          r={radius}
+          strokeWidth={strokeWidth}
+          fill="none"
+          strokeLinecap="round"
+          pathLength={100}
+          strokeDasharray={100}
+          strokeDashoffset={100 - clamped}
+          className={indicatorVariants({ variant })}
+        />
+      </svg>
+      {children && (
+        <div className="absolute inset-0 flex items-center justify-center">{children}</div>
+      )}
+    </div>
+  )
+}
