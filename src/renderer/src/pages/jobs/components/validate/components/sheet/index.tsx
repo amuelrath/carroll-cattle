@@ -18,6 +18,7 @@ import { useScrolljacker } from '../../hooks/use-scrolljacker'
 interface SheetTableProps {
   sheet: TFetchSheetResponse | undefined
   validation: TValidateSheetResponse
+  isScrollAtTop: boolean
 }
 
 // ToDo: If an entire column has errors, the user probably mapped it wrong.
@@ -43,19 +44,31 @@ export function SheetTable({ sheet, validation, isScrollAtTop }: SheetTableProps
   const rows = sheet.rows
 
   return (
-    <div
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className="no-scrollbar relative flex min-h-0 flex-1 overflow-y-scroll"
-    >
+    <div onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
       <Table className="animate-in fade-in relative table-fixed border-b text-xs duration-200">
-        <TableHeader className="bg-muted sticky top-0 z-50 shadow-[inset_0_1px_0_var(--border),inset_0_-1px_0_var(--border)]">
-          <TableRow className="border-b border-transparent">
-            {Object.keys(rows[0]).map((k) => (
-              <TableHead key={k} className="truncate border-r">
-                {k}
-              </TableHead>
-            ))}
+        <TableHeader className="sticky top-0 z-50 shadow-[inset_0_0px_0_var(--border),inset_0_-1px_0_var(--border)]">
+          <TableRow
+            className={cn(
+              'bg-background hover:bg-background border-b border-transparent transition-shadow duration-50',
+              !isScrollAtTop ? 'shadow-md' : 'border-border'
+            )}
+          >
+            {Object.keys(rows[0])
+              // only include columns that got mapped
+              .filter((k) => Object.values(columnMap).includes(k))
+              .map((k) => (
+                <Tooltip key={k}>
+                  <TooltipTrigger
+                    render={<TableHead className="cursor-help truncate border-r">{k}</TableHead>}
+                  />
+                  <TooltipContent side="bottom">
+                    <p>Mapped to</p>
+                    <p className="font-bold">
+                      &quot;{Object.keys(columnMap).find((key) => columnMap[key] === k)}&quot;
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              ))}
           </TableRow>
         </TableHeader>
         <TableBody>
