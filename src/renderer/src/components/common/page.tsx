@@ -1,16 +1,23 @@
 import { cn } from '@renderer/lib/utils'
+import { motion } from 'framer-motion'
 import React from 'react'
 
 interface PageProps {
   children: React.ReactNode
   className?: string
+  direction?: 'horizontal' | 'vertical'
 }
 
-export function Page({ children, className }: PageProps): React.JSX.Element {
+export function Page({
+  children,
+  className,
+  direction = 'horizontal'
+}: PageProps): React.JSX.Element {
   return (
     <div
       className={cn(
-        'flex h-full flex-row gap-2 p-4',
+        'ap-2 flex h-full p-4',
+        direction === 'horizontal' ? 'flex-row' : 'flex-col',
         'has-data-[slot=sidebar]:gap-0 has-data-[slot=sidebar]:p-0 has-data-[slot=titlebar]:gap-0 has-data-[slot=titlebar]:p-0',
         className
       )}
@@ -24,20 +31,27 @@ interface PageSidebarProps {
   children: React.ReactNode
   className?: string
   side?: 'left' | 'right'
+  collapsed?: boolean
 }
 
-export function PageSidebar({ children, className, side = 'left' }: PageSidebarProps) {
+export function PageSidebar({
+  children,
+  className,
+  side = 'left',
+  collapsed = true
+}: PageSidebarProps) {
   return (
-    <aside
+    <motion.aside
+      animate={{ x: collapsed ? '-80%' : '0%' }}
       data-slot="sidebar"
       className={cn(
-        'border-border flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden',
+        'border-border flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden p-2',
         side === 'left' ? 'border-r' : 'border-l',
         className
       )}
     >
       {children}
-    </aside>
+    </motion.aside>
   )
 }
 
@@ -71,7 +85,7 @@ export function PageTitlebar({ children, className }: PageTitlebarProps) {
     <div
       data-slot="titlebar"
       className={cn(
-        'flex max-h-14 min-h-14 w-full border-b px-4 py-1.5 text-base font-semibold',
+        'flex max-h-14 min-h-14 w-full border-b px-2 py-1.5 text-base font-semibold',
         'has-data-[slot=button-group]:flex-row has-data-[slot=button-group]:items-center has-data-[slot=button-group]:justify-between',
         className
       )}

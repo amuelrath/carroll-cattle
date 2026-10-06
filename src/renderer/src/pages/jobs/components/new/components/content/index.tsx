@@ -62,7 +62,7 @@ export function JobContent({ processId }: JobContentProps): React.JSX.Element {
           </Button>
         </PageTitlebarButtonGroup>
       </PageTitlebar>
-      <div className="flex min-h-0 flex-1 flex-col gap-4 p-2">
+      <div className="flex min-h-0 flex-1 flex-col gap-4 p-4">
         <FileUpload />
         <Item variant="muted">
           <ItemContent>
