@@ -18,21 +18,27 @@ const DEF_TECHNICIAN = 'Dr. White'
 
 export const ZPregCheckRow = z.object({
   recipTag: z
-    .preprocess((val: string | number) => String(val).trim(), z.string().min(1))
+    .union([z.string(), z.number()])
+    .transform((val) => String(val).trim())
+    .pipe(z.string().min(1))
     .describe(copy.recipTag),
   date: dateField.describe(copy.date),
   method: z
-    .preprocess(
-      (val: string) => capitalize(val),
-      z.enum(['Palpation', 'Urine', 'Observation', 'Blood', 'Ultrasound'])
-    )
+    .string()
+    .transform(capitalize)
+    .pipe(z.enum(['Palpation', 'Urine', 'Observation', 'Blood', 'Ultrasound']))
     .describe(copy.method),
   sex: zValueOrUndefined(
-    z.preprocess((val: string) => capitalize(val), z.enum(['Bull', 'Heifer']))
+    z
+      .string()
+      .transform(capitalize)
+      .pipe(z.enum(['Bull', 'Heifer']))
   ).describe(copy.sex),
   timePreg: zValueOrUndefined(z.coerce.number()).describe(copy.timePreg),
   result: z
-    .preprocess((val: string) => capitalize(val), z.enum(['Open', 'Pregnant', 'Recheck']))
+    .string()
+    .transform(capitalize)
+    .pipe(z.enum(['Open', 'Pregnant', 'Recheck']))
     .describe(copy.result),
   technician: zValueOrUndefined(z.string()).default(DEF_TECHNICIAN).describe(copy.technician),
   comments: zValueOrUndefined(z.string()).describe(copy.comments)

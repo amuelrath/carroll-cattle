@@ -66,7 +66,10 @@ export const openProfile = function* (scope, earTag: string) {
 
   try {
     // double check that we are where we expect to be
-    yield* act.waitForText(profile.name, earTag)
+    const profileName = yield* act.getText(profile.name)
+    if (profileName !== earTag) {
+      yield* act.waitForText(profile.secondaryName, earTag)
+    }
   } catch (err) {
     if (!(err instanceof errors.TimeoutError)) throw err
     throw new RowIssue(
