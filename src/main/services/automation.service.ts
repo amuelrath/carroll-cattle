@@ -4,7 +4,7 @@ import { WorkerService } from '@main/services/worker.service'
 import type { TAction, TActionOutput, TActionType } from '@shared/automation'
 import { AbortedError } from '@shared/automation/errors'
 import { type TSelectJob } from '@shared/db/schema'
-import { AutomationError, DatabaseError, toAppError } from '@shared/errors'
+import { AutomationError, DatabaseError, NotFoundError, toAppError } from '@shared/errors'
 import { uploadSchemas } from '@shared/schemas/jobs'
 import type { TSpeed, TState } from '@shared/schemas/trpc/automation.schemas'
 import type { WebContents } from 'electron'
@@ -39,8 +39,8 @@ export class AutomationService extends WorkerService {
   public state: TState = { ...defaultState }
 
   constructor(
-    private tasksRepository: TasksRepository,
-    private jobsRepository: JobsRepository
+    private tasks: TasksRepository,
+    private jobs: JobsRepository
   ) {
     super()
   }
@@ -55,7 +55,7 @@ export class AutomationService extends WorkerService {
     this.pauseGate = { promise, release }
 
     this.updateState({ status: 'paused' })
-    return this.jobsRepository.updateJobState(this.state.jobId, 'paused')
+    return this.jobs.updateJobState(this.state.jobId, 'paused')
   }
 
   resume(): ResultAsync<void, AutomationError | DatabaseError> {
@@ -69,7 +69,7 @@ export class AutomationService extends WorkerService {
     this.pauseGate = null
 
     this.updateState({ status: 'active' })
-    return this.jobsRepository.updateJobState(this.state.jobId, 'active')
+    return this.jobs.updateJobState(this.state.jobId, 'active')
   }
 
   changeSpeed(speed: TSpeed): Result<void, AutomationError> {
@@ -80,14 +80,14 @@ export class AutomationService extends WorkerService {
   async run(
     jobId: TSelectJob['id'],
     sender: WebContents
-  ): Promise<ResultAsync<void, AutomationError | DatabaseError>> {
+  ): Promise<ResultAsync<void, AutomationError | DatabaseError | NotFoundError>> {
     this.currAborter = new AbortController()
 
     const res = await safeTry(() => this.getTaskRowsAndProcessId(jobId))
     if (res.isErr()) return err(res.error)
     const { processId, rows } = res.value
 
-    const stateRes = await this.jobsRepository.updateJobState(jobId, 'active')
+    const stateRes = await this.jobs.updateJobState(jobId, 'active')
     if (stateRes.isErr()) return stateRes
     this.updateState({ status: 'active', jobId })
 
@@ -100,13 +100,14 @@ export class AutomationService extends WorkerService {
         request: this.request,
         onIssue: async (idx, issue, screenshot) => {
           const task = this.state.tasks[idx]
-          await this.tasksRepository.upsertIssue(task.id, screenshot, issue.message)
+          if (!task.row) throw new Error('Tried accessing a task that did not exist.')
+          await this.tasks.upsertIssue(task.id, screenshot, issue.message, task.row.copyRow)
           if (res.isErr()) throw res.error
           this.emission('refetch', { jobId, idx })
         },
         onCommit: async (idx, screenshot) => {
           const task = this.state.tasks[idx]
-          await this.tasksRepository.commitTask(task.id, screenshot)
+          await this.tasks.commitTask(task.id, screenshot)
           if (res.isErr()) throw res.error
           this.emission('refetch', { jobId, idx })
         },
@@ -125,7 +126,7 @@ export class AutomationService extends WorkerService {
       return errAsync(toAppError(e, AutomationError))
     } finally {
       this.updateState({ status: 'inactive' })
-      await this.jobsRepository.updateJobState(jobId, 'inactive')
+      await this.jobs.updateJobState(jobId, 'inactive')
       this.stop()
     }
   }
@@ -152,9 +153,9 @@ export class AutomationService extends WorkerService {
   }
 
   private async *getTaskRowsAndProcessId(jobId: TSelectJob['id']) {
-    const job = yield* this.jobsRepository.readJob(jobId)
-    const tasks = yield* this.tasksRepository.readIncompleteJobTasksWithRows(jobId)
-    const taskRows = tasks.map((t) => uploadSchemas[job.processId].parse(t.row?.json))
+    const job = yield* this.jobs.readJob(jobId)
+    const tasks = yield* this.tasks.readIncompleteJobTasksWithRows(jobId)
+    const taskRows = tasks.map((t) => uploadSchemas[job.processId].parse(t.row?.copyRow))
 
     if (!taskRows || taskRows.length === 0) {
       return errAsync(
