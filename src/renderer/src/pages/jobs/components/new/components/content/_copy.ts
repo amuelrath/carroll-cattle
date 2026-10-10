@@ -39,4 +39,4 @@ export const exampleRows = {
       comments: 'Recheck in 2 weeks.'
     }
   ]
-} satisfies { [K in TProcessId]: z.infer<TFileRow<K>>[] }
+} satisfies { [K in TProcessId]: TFileRow<K>[] }
