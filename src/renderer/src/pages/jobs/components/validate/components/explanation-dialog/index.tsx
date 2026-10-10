@@ -32,11 +32,9 @@ export function ExplanationDialog({
           <InfoIcon {...iconSizes.small} />
         </Button>
       </DialogTrigger>
-      {!isValid ? (
+      {!isValid ?
         <ExplanationDialogContent manuallyOpened={manuallyOpened} />
-      ) : (
-        <ValidDialogContent onContinue={onContinue} />
-      )}
+      : <ValidDialogContent onContinue={onContinue} />}
     </Dialog>
   )
 }

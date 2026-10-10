@@ -29,7 +29,9 @@ export function ErrorScreen({ error }: ErrorComponentProps): React.JSX.Element {
         <p className="text-muted-foreground max-w-md text-center text-sm">{message}</p>
       </div>
       <Button variant="outline" size="sm" className="w-40" onClick={handleCopy}>
-        {copied ? <CheckIcon /> : <CopyIcon />}
+        {copied ?
+          <CheckIcon />
+        : <CopyIcon />}
         {copied ? 'Copied!' : 'Copy error details'}
       </Button>
       <Separator className="!w-64" />

@@ -3,7 +3,7 @@ import type { Api } from '@preload/ipc'
 
 declare global {
   interface Window {
-    electron: ElectronAPI,
+    electron: ElectronAPI
     api: Api
   }
 }
