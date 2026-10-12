@@ -91,10 +91,14 @@ export class TasksRepository {
           .set({ status: 'done', completedAt: new Date() })
           .where(eq(tasks.id, taskId))
         // upload proof
-        await tx.insert(taskProofs).values({
-          taskId,
-          imgBase64
-        })
+        await tx
+          .insert(taskProofs)
+          .values({
+            taskId,
+            imgBase64
+          })
+          .onConflictDoUpdate({ target: taskProofs.taskId, set: { imgBase64 } })
+
         // remove issues
         await tx.delete(taskIssues).where(eq(taskIssues.taskId, taskId))
       }),
