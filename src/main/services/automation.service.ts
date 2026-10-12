@@ -101,13 +101,18 @@ export class AutomationService extends WorkerService {
         onIssue: async (idx, issue, screenshot) => {
           const task = this.state.tasks[idx]
           if (!task.row) throw new Error('Tried accessing a task that did not exist.')
-          await this.tasks.upsertIssue(task.id, screenshot, issue.message, task.row.copyRow)
+          const res = await this.tasks.upsertIssue(
+            task.id,
+            screenshot,
+            issue.message,
+            task.row.copyRow
+          )
           if (res.isErr()) throw res.error
           this.emission('refetch', { jobId, idx })
         },
         onCommit: async (idx, screenshot) => {
           const task = this.state.tasks[idx]
-          await this.tasks.commitTask(task.id, screenshot)
+          const res = await this.tasks.commitTask(task.id, screenshot)
           if (res.isErr()) throw res.error
           this.emission('refetch', { jobId, idx })
         },
