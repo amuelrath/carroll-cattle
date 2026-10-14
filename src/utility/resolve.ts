@@ -4,6 +4,8 @@ import { type Locator, type Page } from 'playwright'
 export function locate(root: Page | Locator, selector: TSelector): Locator {
   const { type, input } = selector
   switch (type) {
+    case 'role':
+      return root.getByRole(input, { ...selector.options })
     case 'label':
       return root.getByLabel(input)
     case 'title':
