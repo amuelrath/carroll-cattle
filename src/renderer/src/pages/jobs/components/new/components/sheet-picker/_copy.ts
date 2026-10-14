@@ -1,10 +1,10 @@
-import { ArrowLeftRightIcon, FileStackIcon, type LucideIcon } from 'lucide-react'
-import { Step } from './index'
+import { FileStackIcon } from 'lucide-react'
 
 const selectSheetBase = {
-  backButton: 'Cancel',
+  cancelButton: 'Cancel',
   previewLabel: 'Sheet Preview',
-  submitButton: 'Select Sheet'
+  submitButton: 'Select Sheet',
+  icon: FileStackIcon
 }
 
 export const selectSheetCopy = {
@@ -42,14 +42,3 @@ export const mapColumnCopy = {
   requiredColumn: 'Required Column',
   error: 'All required columns must have assignments.'
 } as const
-
-export const stepMeta: Record<Step, { icon: LucideIcon; step: string }> = {
-  'select-sheet': {
-    icon: FileStackIcon,
-    step: '1 of 2'
-  },
-  'map-columns': {
-    icon: ArrowLeftRightIcon,
-    step: '2 of 2'
-  }
-}

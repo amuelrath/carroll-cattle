@@ -2,8 +2,9 @@ import type { DrizzleDb } from '@main/db'
 import { fileRows, files, type TInsertFile, type TSelectFile } from '@shared/db/schema'
 import { DatabaseError } from '@shared/errors'
 import { errors } from '@shared/resources/strings'
-import type { TValidateSheetSuccessResponse } from '@shared/schemas/trpc'
-import { eq } from 'drizzle-orm'
+import { type TValidateSheetSuccessResponse } from '@shared/schemas/trpc'
+import type { TUpdateRowValueInput } from '@shared/schemas/trpc/file.schemas'
+import { and, eq } from 'drizzle-orm'
 import { ResultAsync } from 'neverthrow'
 
 export class FilesRepository {
@@ -22,7 +23,8 @@ export class FilesRepository {
         const rowsToInsert = rows.map((row, rowIdx) => ({
           fileId,
           rowIdx,
-          json: row
+          originalRow: row,
+          copyRow: row
         }))
 
         await tx.insert(fileRows).values(rowsToInsert)
@@ -33,15 +35,13 @@ export class FilesRepository {
     )
   }
 
-  readFileWithRows(id: TSelectFile['id']) {
+  readFile(id: TSelectFile['id']) {
     return ResultAsync.fromPromise(
-      this.db
-        .select()
-        .from(files)
-        .where(eq(files.id, id))
-        .limit(1)
-        .innerJoin(fileRows, eq(files.id, fileRows.fileId))
-        .execute(),
+      this.db.query.files.findFirst({
+        where: {
+          id
+        }
+      }),
       (err) => new DatabaseError(errors.database, { cause: err })
     )
   }
@@ -72,6 +72,33 @@ export class FilesRepository {
         .execute()
         .then(() => undefined),
       (err) => new DatabaseError(errors.database, { cause: err })
+    )
+  }
+
+  updateRow({
+    fileId,
+    rowIdx,
+    value,
+    columnName
+  }: TUpdateRowValueInput): ResultAsync<void, DatabaseError> {
+    return ResultAsync.fromPromise(
+      this.db.transaction(async (tx) => {
+        const { copyRow } = await tx
+          .select()
+          .from(fileRows)
+          .where(and(eq(fileRows.fileId, fileId), eq(fileRows.rowIdx, rowIdx)))
+          .then((res) => {
+            if (res.length > 1) throw new Error('Multiple rows were returned.')
+            return res[0]
+          })
+
+        await tx
+          .update(fileRows)
+          .set({ copyRow: { ...copyRow, [columnName]: value ? value.trim() : null } })
+          .where(and(eq(fileRows.fileId, fileId), eq(fileRows.rowIdx, rowIdx)))
+      }),
+
+      (cause) => new DatabaseError(errors.database, { cause })
     )
   }
 }

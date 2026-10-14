@@ -1,6 +1,6 @@
 import type { DrizzleDb } from '@main/db'
 import { jobs, type TInsertJob, type TJobStatus, type TSelectJob } from '@shared/db/schema'
-import { DatabaseError } from '@shared/errors'
+import { DatabaseError, NotFoundError } from '@shared/errors'
 import { errors } from '@shared/resources/strings'
 import type {
   TGetAllJobsWithProcessAndFileResponse,
@@ -24,11 +24,11 @@ export class JobsRepository {
     )
   }
 
-  readJob(id: TSelectJob['id']): ResultAsync<TSelectJob, DatabaseError> {
+  readJob(id: TSelectJob['id']): ResultAsync<TSelectJob, DatabaseError | NotFoundError> {
     return ResultAsync.fromPromise(
-      this.db.select().from(jobs).where(eq(jobs.id, id)).limit(1).execute(),
+      this.db.select().from(jobs).where(eq(jobs.id, id)).execute(),
       (cause) => new DatabaseError(errors.database, { cause })
-    ).andThen((rows) => (rows[0] ? okAsync(rows[0]) : errAsync(new DatabaseError(errors.notFound))))
+    ).andThen((rows) => (rows[0] ? okAsync(rows[0]) : errAsync(new NotFoundError(errors.notFound))))
   }
 
   readAllJobsWithProcessAndFile(): ResultAsync<
@@ -59,11 +59,12 @@ export class JobsRepository {
             id
           },
           with: {
+            file: true,
             process: true,
             tasks: {
               with: {
                 proof: true,
-                issues: true,
+                issue: true,
                 row: true
               }
             }

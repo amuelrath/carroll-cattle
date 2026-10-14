@@ -11,7 +11,7 @@ const iconCircleVariants = cva(
       variant: {
         default: 'bg-muted',
         inverse: 'bg-white',
-        destructive: 'bg-destructive border-destructive-foreground text-destructive-foreground',
+        destructive: 'bg-destructive/10 border-destructive-foreground text-destructive-foreground',
         warn: 'bg-warn text-warn-foreground border-warn-foreground',
         okay: 'bg-okay text-okay-foreground border-okay-foreground'
       },

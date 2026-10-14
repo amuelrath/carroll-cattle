@@ -7,9 +7,9 @@ import {
   TableHeader,
   TableRow
 } from '@renderer/components/ui/table'
+import { selectSheetCopy as copy } from '@renderer/pages/jobs/components/new/components/sheet-picker/_copy'
 import { GhostIcon } from 'lucide-react'
 import React from 'react'
-import { selectSheetCopy as copy } from './_copy'
 
 function SheetEmpty(): React.JSX.Element {
   return (
@@ -30,12 +30,14 @@ export function SheetPreviewTable({ headRows }: SheetPreviewProps): React.JSX.El
   }
   const rows = headRows as Array<Record<string, unknown>>
 
+  const columns = [...new Set(...rows.map((r) => Object.keys(r)))]
+
   return (
     <div className="border-border rounded-md border">
       <Table className="text-xs">
         <TableHeader className="bg-muted">
           <TableRow>
-            {Object.keys(rows[0]).map((colName) => (
+            {columns.map((colName) => (
               <TableHead key={colName} className="max-w-0 truncate">
                 {colName}
               </TableHead>
@@ -45,9 +47,9 @@ export function SheetPreviewTable({ headRows }: SheetPreviewProps): React.JSX.El
         <TableBody>
           {rows.map((row, i) => (
             <TableRow key={i}>
-              {Object.values(row).map((v, j) => (
-                <TableCell key={`row-${i}-col-${j}`} className="h-9 max-w-0 truncate">
-                  {String(v)}
+              {columns.map((colName) => (
+                <TableCell key={colName} className="h-9 max-w-0 truncate">
+                  {String(row?.[colName])}
                 </TableCell>
               ))}
             </TableRow>

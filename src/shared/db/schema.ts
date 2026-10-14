@@ -1,12 +1,16 @@
-import type { TProcessId } from '@shared/schemas/jobs'
+import { type TRecord, ZRecord } from '@shared/schemas/helper.schemas'
+import { type TProcessId, ZProcessId } from '@shared/schemas/jobs'
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { defineRelations } from 'drizzle-orm/relations'
 import { foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createSelectSchema } from 'drizzle-orm/zod'
 import { z } from 'zod'
 
-export type TJobStatus = 'active' | 'inactive' | 'paused'
-export type TTaskStatus = 'done' | 'notDone'
+export const ZJobStatus = z.enum(['active', 'inactive', 'paused'])
+export type TJobStatus = z.infer<typeof ZJobStatus>
+
+export const ZTaskStatus = z.enum(['done', 'issue', 'notDone'])
+export type TTaskStatus = z.infer<typeof ZTaskStatus>
 
 export const processes = sqliteTable('processes', {
   id: text().primaryKey().$type<TProcessId>(),
@@ -15,20 +19,24 @@ export const processes = sqliteTable('processes', {
 })
 export type TSelectProcess = InferSelectModel<typeof processes>
 export type TInsertProcess = InferInsertModel<typeof processes>
-export const ZSelectProcess = createSelectSchema(processes)
+export const ZSelectProcess = createSelectSchema(processes, {
+  id: ZProcessId
+})
 
-// MaybeToDo: Add sha256 hash to guard against duplicate sheet uploads?
 export const files = sqliteTable('files', {
   id: int().primaryKey({ autoIncrement: true }),
   fileName: text().notNull(),
   sheetName: text().notNull(),
+  columnMap: text({ mode: 'json' }).$type<Record<string, string>>(),
   uploadedAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date())
 })
 export type TSelectFile = InferSelectModel<typeof files>
 export type TInsertFile = InferInsertModel<typeof files>
-export const ZSelectFile = createSelectSchema(files)
+export const ZSelectFile = createSelectSchema(files, {
+  columnMap: z.record(z.string(), z.string()).nullable()
+})
 
 export const fileRows = sqliteTable(
   'fileRows',
@@ -37,14 +45,16 @@ export const fileRows = sqliteTable(
       .notNull()
       .references(() => files.id, { onDelete: 'cascade' }),
     rowIdx: int().notNull(),
-    json: text({ mode: 'json' }).notNull()
+    originalRow: text({ mode: 'json' }).$type<TRecord>().notNull(),
+    copyRow: text({ mode: 'json' }).$type<TRecord>().notNull()
   },
   (t) => [primaryKey({ columns: [t.fileId, t.rowIdx] })]
 )
 export type TSelectFileRow = InferSelectModel<typeof fileRows>
 export type TInsertFileRow = InferInsertModel<typeof fileRows>
 export const ZSelectFileRow = createSelectSchema(fileRows, {
-  json: z.unknown()
+  originalRow: ZRecord,
+  copyRow: ZRecord
 })
 
 export const jobs = sqliteTable('jobs', {
@@ -65,7 +75,10 @@ export const jobs = sqliteTable('jobs', {
 })
 export type TSelectJob = InferSelectModel<typeof jobs>
 export type TInsertJob = InferInsertModel<typeof jobs>
-export const ZSelectJob = createSelectSchema(jobs)
+export const ZSelectJob = createSelectSchema(jobs, {
+  processId: ZProcessId,
+  status: ZJobStatus
+})
 
 export const tasks = sqliteTable(
   'tasks',
@@ -95,14 +108,18 @@ export const tasks = sqliteTable(
 )
 export type TSelectTask = InferSelectModel<typeof tasks>
 export type TInsertTask = InferInsertModel<typeof tasks>
-export const ZSelectTask = createSelectSchema(tasks)
+export const ZSelectTask = createSelectSchema(tasks, {
+  status: ZTaskStatus
+})
 
 export const taskProofs = sqliteTable('taskProofs', {
   taskId: int()
     .primaryKey()
     .references(() => tasks.id, { onDelete: 'cascade' }),
   imgBase64: text().notNull(),
-  createdAt: int({ mode: 'timestamp_ms' }).$defaultFn(() => new Date())
+  createdAt: int({ mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date())
 })
 export type TSelectTaskProof = InferSelectModel<typeof taskProofs>
 export type TInsertTaskProof = InferInsertModel<typeof taskProofs>
@@ -112,6 +129,7 @@ export const taskIssues = sqliteTable('taskIssues', {
   taskId: int()
     .primaryKey()
     .references(() => tasks.id, { onDelete: 'cascade' }),
+  rowSnapshot: text({ mode: 'json' }).$type<TRecord>().notNull(),
   imgBase64: text().notNull(),
   desc: text().notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
@@ -120,7 +138,9 @@ export const taskIssues = sqliteTable('taskIssues', {
 })
 export type TSelectTaskIssue = InferSelectModel<typeof taskIssues>
 export type TInsertTaskIssue = InferInsertModel<typeof taskIssues>
-export const ZSelectTaskIssue = createSelectSchema(taskIssues)
+export const ZSelectTaskIssue = createSelectSchema(taskIssues, {
+  rowSnapshot: ZRecord
+})
 
 export const relations = defineRelations(
   {
@@ -176,7 +196,7 @@ export const relations = defineRelations(
         from: r.tasks.id,
         to: r.taskProofs.taskId
       }),
-      issues: r.one.taskIssues({
+      issue: r.one.taskIssues({
         from: r.tasks.id,
         to: r.taskIssues.taskId
       })

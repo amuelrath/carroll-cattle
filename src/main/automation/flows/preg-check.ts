@@ -185,13 +185,13 @@ export const checkOrFill = function* (scope, row: TFileRow<'pregCheck'>) {
   if (exists) {
     yield narr('Reviewing a previous entry...')
     match = yield* check()
-    if (match) return match.screenshot
+    if (match.valid) return match.screenshot
   }
   yield* fillPregCheck(scope, row)
 
   yield narr('Checking work...')
   match = yield* check()
-  if (match) {
+  if (match.valid) {
     return match.screenshot
   }
 

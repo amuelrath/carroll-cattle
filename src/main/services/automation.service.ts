@@ -1,10 +1,11 @@
 import { runFlow } from '@main/automation/flow'
-import { JobsRepository, TasksRepository } from '@main/repositories'
+import { FilesRepository, JobsRepository, TasksRepository } from '@main/repositories'
 import { WorkerService } from '@main/services/worker.service'
 import type { TAction, TActionOutput, TActionType } from '@shared/automation'
 import { AbortedError } from '@shared/automation/errors'
 import { type TSelectJob } from '@shared/db/schema'
 import { AutomationError, DatabaseError, NotFoundError, toAppError } from '@shared/errors'
+import { projectRow } from '@shared/lib/sheet'
 import { uploadSchemas } from '@shared/schemas/jobs'
 import type { TSpeed, TState } from '@shared/schemas/trpc/automation.schemas'
 import type { WebContents } from 'electron'
@@ -39,6 +40,7 @@ export class AutomationService extends WorkerService {
   public state: TState = { ...defaultState }
 
   constructor(
+    private files: FilesRepository,
     private tasks: TasksRepository,
     private jobs: JobsRepository
   ) {
@@ -159,8 +161,14 @@ export class AutomationService extends WorkerService {
 
   private async *getTaskRowsAndProcessId(jobId: TSelectJob['id']) {
     const job = yield* this.jobs.readJob(jobId)
+    const file = yield* this.files.readFile(job.fileId)
     const tasks = yield* this.tasks.readIncompleteJobTasksWithRows(jobId)
-    const taskRows = tasks.map((t) => uploadSchemas[job.processId].parse(t.row?.copyRow))
+    const mappedRows = tasks.map((task) => {
+      if (!file?.columnMap) return errAsync(new NotFoundError(`Job ${job.id} is unmapped!`))
+      if (!task.row?.copyRow) return errAsync(new NotFoundError(`Task ${task.id} has no row.`))
+      return projectRow(task.row.copyRow, file.columnMap, { inverse: true })
+    })
+    const taskRows = mappedRows.map((row) => uploadSchemas[job.processId].parse(row))
 
     if (!taskRows || taskRows.length === 0) {
       return errAsync(

@@ -3,11 +3,11 @@ import { Button } from '@renderer/components/ui/button'
 import { toast } from '@renderer/components/ui/toast'
 import { trpc } from '@renderer/lib/trpc'
 import { cn } from '@renderer/lib/utils'
+import { SheetPicker } from '@renderer/pages/jobs/components/new/components/sheet-picker'
 import { errors } from '@shared/resources/strings'
 import { TSheetPreviewResponse } from '@shared/schemas/trpc'
 import { FileUpIcon, UploadIcon } from 'lucide-react'
 import React, { useRef, useState } from 'react'
-import { SheetUploadWizard } from '../sheet-upload-wizard'
 import { fileUploadCopy as copy } from './_copy'
 
 type TDragDropValidationResult =
@@ -89,9 +89,9 @@ export function FileUpload(): React.JSX.Element {
       toast.add({
         type: 'error',
         description:
-          result.reason === 'multiple'
-            ? 'Cannot upload multiple files at once.'
-            : 'Please upload a CSV, XLS, or XLSX file.'
+          result.reason === 'multiple' ?
+            'Cannot upload multiple files at once.'
+          : 'Please upload a CSV, XLS, or XLSX file.'
       })
       return
     }
@@ -121,7 +121,7 @@ export function FileUpload(): React.JSX.Element {
         </Button>
         <p className="text-muted-foreground text-xs">{copy.supportedFileTypes}</p>
       </div>
-      <SheetUploadWizard sheets={sheets} filePath={filePath} cancel={() => setSheets(null)} />
+      <SheetPicker sheets={sheets} filePath={filePath} cancel={() => setSheets(null)} />
     </>
   )
 }

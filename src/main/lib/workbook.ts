@@ -1,53 +1,8 @@
-import { getIssueDetails } from '@main/lib/get-issue-details'
 import { SheetError } from '@shared/errors'
 import { errors } from '@shared/resources/strings'
-import type {
-  TFetchSheetResponse,
-  TSheetPreviewResponse,
-  TValidateSheetErrorResponse,
-  TValidateSheetInput,
-  TValidateSheetResponse
-} from '@shared/schemas/trpc'
+import type { TFetchSheetResponse, TSheetPreviewResponse } from '@shared/schemas/trpc'
 import { Result } from 'neverthrow'
 import XLSX from 'xlsx'
-import { z } from 'zod'
-
-export function getSheetErrors({
-  mappedSheet,
-  schema,
-  columnMap
-}: {
-  mappedSheet: TFetchSheetResponse['rows']
-  schema: z.ZodType
-  columnMap: TValidateSheetInput['columnMap']
-}): TValidateSheetResponse {
-  const cellErrs: TValidateSheetErrorResponse['errors'] = []
-  const parsedRows: TFetchSheetResponse['rows'] = []
-
-  mappedSheet.forEach((row, rowIdx) => {
-    const result = schema.safeParse(row)
-
-    if (result.success) {
-      parsedRows.push(result.data as Record<string, unknown>)
-      return
-    }
-
-    cellErrs.push(
-      ...result.error.issues.map((iss) => {
-        const targetKey = iss.path[0] as string
-        return {
-          rowIdx,
-          columnName: columnMap[targetKey] ?? targetKey,
-          detail: getIssueDetails(iss)
-        }
-      })
-    )
-  })
-
-  if (cellErrs.length > 0) return { status: 'invalid', errors: cellErrs }
-
-  return { status: 'valid', sheet: parsedRows }
-}
 
 export function readWorkbook({
   filePath
@@ -89,27 +44,4 @@ export function getWorkbookSheetNamesAndHeads({
     const headRows = rows && rows.length > 0 ? rows : null
     return { sheetName, headRows }
   })
-}
-
-export function mapColumnNames({
-  sheet,
-  columnMap
-}: {
-  sheet: TFetchSheetResponse['rows']
-  columnMap: TValidateSheetInput['columnMap']
-}) {
-  /* columnMap = Record<TargetKey, SheetKey>
-   * the TargetKeys are derived from the schema
-   * the SkeetKeys are from the parsed sheet
-   */
-  const reverseMap = Object.fromEntries(
-    Object.entries(columnMap).map(([newKey, oldKey]) => [oldKey, newKey])
-  )
-  return sheet.map((row) =>
-    Object.fromEntries(
-      Object.entries(row)
-        .filter(([oldKey]) => oldKey in reverseMap)
-        .map(([oldKey, value]) => [reverseMap[oldKey], value])
-    )
-  )
 }

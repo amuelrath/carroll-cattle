@@ -13,8 +13,7 @@ import { z } from 'zod'
 export const ZCreateJobInput = z.object({
   processId: ZProcessId,
   filePath: z.string().min(1),
-  sheetName: z.string().min(1),
-  columnMap: z.record(z.string().min(1), z.string().min(1))
+  sheetName: z.string().min(1)
 })
 export type TCreateJobInput = z.infer<typeof ZCreateJobInput>
 
@@ -28,24 +27,28 @@ export const ZGetJobWithTasksInput = z.object({
 })
 export type TGetJobWithTasksInput = z.infer<typeof ZGetJobWithTasksInput>
 
+export const ZTaskWithRelations = ZSelectTask.extend({
+  row: ZSelectFileRow,
+  proof: ZSelectTaskProof.optional().nullable(),
+  issue: ZSelectTaskIssue.optional().nullable()
+})
+export type TTaskWithRelations = z.infer<typeof ZTaskWithRelations>
+
 export const ZGetJobWithTasksResponse = ZSelectJob.extend({
   process: ZSelectProcess,
-  tasks: z.array(
-    ZSelectTask.extend({
-      row: ZSelectFileRow,
-      proof: ZSelectTaskProof.optional().nullable(),
-      issues: ZSelectTaskIssue.optional().nullable()
-    })
-  )
+  file: ZSelectFile,
+  tasks: z.array(ZTaskWithRelations)
 })
 export type TGetJobWithTasksResponse = z.infer<typeof ZGetJobWithTasksResponse>
 
-export const ZGetAllJobsWithProcessAndFileResponse = z.array(
-  ZSelectJob.extend({
-    process: ZSelectProcess,
-    file: ZSelectFile
-  })
-)
+export const ZGetAllJobsWithProcessAndFileResponse = z
+  .array(
+    ZSelectJob.extend({
+      process: ZSelectProcess,
+      file: ZSelectFile
+    })
+  )
+  .optional()
 export type TGetAllJobsWithProcessAndFileResponse = z.infer<
   typeof ZGetAllJobsWithProcessAndFileResponse
 >

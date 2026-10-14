@@ -1,3 +1,4 @@
+import { fileRouter } from '@main/trpc/routers/file'
 import { automationRouter } from './routers/automation'
 import { dialogRouter } from './routers/dialog'
 import { jobRouter } from './routers/job'
@@ -14,7 +15,8 @@ export const appRouter = router({
   system: systemRouter,
   job: jobRouter,
   process: processRouter,
-  automation: automationRouter
+  automation: automationRouter,
+  file: fileRouter
 })
 
 export type AppRouter = typeof appRouter

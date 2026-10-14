@@ -11,7 +11,7 @@ import {
 } from '@shared/db/schema'
 import { DatabaseError } from '@shared/errors'
 import { errors } from '@shared/resources/strings'
-import type { TReadIncompleteTasksWithRowsResponse } from '@shared/schemas/trpc/task.schemas'
+import type { TRecord } from '@shared/schemas/helper.schemas'
 import { eq } from 'drizzle-orm'
 import { ResultAsync } from 'neverthrow'
 
@@ -49,30 +49,12 @@ export class TasksRepository {
     )
   }
 
-  readJobTasksWithRows(jobId: TSelectJob['id']) {
-    return ResultAsync.fromPromise(
-      this.db.query.tasks.findMany({
-        where: {
-          jobId
-        },
-        with: {
-          row: true,
-          issues: true,
-          proof: true
-        }
-      }),
-      (cause) => new DatabaseError(errors.database, { cause })
-    )
-  }
-
-  readIncompleteJobTasksWithRows(
-    jobId: TSelectJob['id']
-  ): ResultAsync<TReadIncompleteTasksWithRowsResponse, DatabaseError> {
+  readIncompleteJobTasksWithRows(jobId: TSelectJob['id']) {
     return ResultAsync.fromPromise(
       this.db.query.tasks.findMany({
         where: {
           jobId,
-          status: 'notDone'
+          status: { in: ['issue', 'notDone'] }
         },
         with: {
           row: true
@@ -106,16 +88,18 @@ export class TasksRepository {
     )
   }
 
-  upsertIssue(taskId: TSelectTask['id'], imgBase64: string, desc: string) {
+  // ToDo: Move this to a TaskService and make this repo access only
+  upsertIssue(taskId: TSelectTask['id'], imgBase64: string, desc: string, rowSnapshot: TRecord) {
     return ResultAsync.fromPromise(
       this.db.transaction(async (tx) => {
-        await tx.update(tasks).set({ status: 'notDone' }).where(eq(tasks.id, taskId))
+        await tx.update(tasks).set({ status: 'issue' }).where(eq(tasks.id, taskId))
         await tx
           .insert(taskIssues)
           .values({
             taskId,
             imgBase64,
-            desc
+            desc,
+            rowSnapshot
           })
           .onConflictDoUpdate({ target: taskIssues.taskId, set: { imgBase64, desc } })
       }),

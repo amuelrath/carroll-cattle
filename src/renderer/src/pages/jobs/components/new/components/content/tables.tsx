@@ -23,7 +23,7 @@ export function ExampleDataTable({ processId }: ExampleDataTableProps): React.JS
       <Table className="table-fixed text-xs">
         <TableCaption>
           <Tooltip>
-            <TooltipTrigger className="cursor-pointer opacity-75 transition hover:opacity-100">
+            <TooltipTrigger className="opacity-75 transition hover:opacity-100">
               <span className="flex flex-row items-center justify-center space-x-1 pb-2">
                 What does this mean?
               </span>
