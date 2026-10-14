@@ -4,7 +4,7 @@ import { errors } from 'playwright'
 
 export class AbortedError extends Error {}
 
-export type RowIssueCode = 'NOT_FOUND' | 'WARN' | 'REVIEW' | 'INTERNAL'
+export type RowIssueCode = 'NOT_FOUND' | 'WARN' | 'REVIEW' | 'INTERNAL' | 'MISSING_DATA'
 export class RowIssue extends Error {
   constructor(
     public code: RowIssueCode,
