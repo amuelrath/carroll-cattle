@@ -19,4 +19,4 @@ export function __setDbForTesting(testDb: DrizzleDb) {
   _db = testDb
 }
 
-export type DrizzleDb = ReturnType<typeof drizzle<typeof relations>> // or however you currently derive this
+export type DrizzleDb = ReturnType<typeof drizzle<typeof relations>>
