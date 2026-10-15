@@ -6,7 +6,7 @@ import { foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqli
 import { createSelectSchema } from 'drizzle-orm/zod'
 import { z } from 'zod'
 
-export const ZJobStatus = z.enum(['active', 'inactive', 'paused'])
+export const ZJobStatus = z.enum(['active', 'inactive', 'paused', 'complete'])
 export type TJobStatus = z.infer<typeof ZJobStatus>
 
 export const ZTaskStatus = z.enum(['done', 'issue', 'notDone'])

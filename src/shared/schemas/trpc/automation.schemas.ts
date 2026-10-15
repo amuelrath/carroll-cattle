@@ -1,4 +1,4 @@
-import type { TJobStatus } from '@shared/db/schema'
+import { ZJobStatus } from '@shared/db/schema'
 import { ZReadIncompleteTasksWithRowsResponse } from '@shared/schemas/trpc/task.schemas'
 import { z } from 'zod'
 
@@ -15,7 +15,7 @@ export const ZSpeedInput = z.object({
 
 export const ZState = z.object({
   speed: ZSpeed,
-  status: z.enum(['paused', 'active', 'inactive'] satisfies TJobStatus[]),
+  status: ZJobStatus,
   narration: z.union([z.string(), z.undefined()]),
   jobId: z.union([z.number(), z.undefined()]),
   tasks: ZReadIncompleteTasksWithRowsResponse

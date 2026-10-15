@@ -114,8 +114,9 @@ export class AutomationService extends WorkerService {
         },
         onCommit: async (idx, screenshot) => {
           const task = this.state.tasks[idx]
-          const res = await this.tasks.commitTask(task.id, screenshot)
-          if (res.isErr()) throw res.error
+          const taskUpdateRes = await this.tasks.commitTask(task.id, screenshot)
+          task.status = 'done'
+          if (taskUpdateRes.isErr()) throw taskUpdateRes.error
           this.emission('refetch', { jobId, idx })
         },
         onWarn: async (warning) => {
@@ -132,8 +133,13 @@ export class AutomationService extends WorkerService {
       console.info('[AutomationService] Worker Died', e)
       return errAsync(toAppError(e, AutomationError))
     } finally {
-      this.updateState({ status: 'inactive' })
-      await this.jobs.updateJobState(jobId, 'inactive')
+      if (this.state.tasks.every((task) => task.status === 'done')) {
+        this.updateState({ status: 'complete' })
+        await this.jobs.updateJobState(jobId, 'complete')
+      } else {
+        this.updateState({ status: 'inactive' })
+        await this.jobs.updateJobState(jobId, 'inactive')
+      }
       this.stop()
     }
   }
