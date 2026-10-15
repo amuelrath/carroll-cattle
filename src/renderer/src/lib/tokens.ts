@@ -16,7 +16,7 @@ export const iconSizes = {
     strokeWidth: 1
   },
   xlarge: {
-    size: 32,
+    size: 26,
     strokeWidth: 1
   }
 } as const
