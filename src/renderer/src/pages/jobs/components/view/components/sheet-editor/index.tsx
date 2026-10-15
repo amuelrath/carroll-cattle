@@ -3,7 +3,6 @@ import { TableBody, TableHead, TableHeader, TableRow } from '@renderer/component
 import { CustomTabsTrigger } from '@renderer/components/ui/tabs'
 import { trpc } from '@renderer/lib/trpc'
 import { cn } from '@renderer/lib/utils'
-import { ColumnMapperDialog } from '@renderer/pages/jobs/components/view/components/column-mapper'
 import { Row } from '@renderer/pages/jobs/components/view/components/sheet-editor/row'
 import { RowContext } from '@renderer/pages/jobs/components/view/components/sheet-editor/row-context'
 import { type TColumn, type TSheet, UNUSED } from '@shared/schemas/trpc'
@@ -107,10 +106,7 @@ export function SheetEditor({ sheet }: SheetEditorProps) {
             <SheetTable sheet={sheet} onCellUpdate={onCellUpdate} />
           </div>
         </>
-      : <EmptyState title="Columns Unmapped" desc="Please map column names to continue.">
-          <ColumnMapperDialog variant="default" />
-        </EmptyState>
-      }
+      : <EmptyState title="Columns Unmapped" desc="Please map column names to continue." />}
     </div>
   )
 }

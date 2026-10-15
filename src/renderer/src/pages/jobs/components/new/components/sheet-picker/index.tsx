@@ -85,7 +85,7 @@ export function SheetPicker({ sheets, filePath, cancel }: SheetPickerProps): Rea
     const { jobId } = await mutateCreateJob({ processId, ...data })
     await navigate({
       to: '/jobs/view',
-      search: { jobId, tab: 'sheet' }
+      search: { jobId, mainTab: 'sheet' }
     })
   }
   return (

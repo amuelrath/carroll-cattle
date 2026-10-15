@@ -1,6 +1,6 @@
 import { cn } from '@renderer/lib/utils'
 import { motion } from 'framer-motion'
-import React from 'react'
+import React, { type Ref } from 'react'
 
 interface PageProps {
   children: React.ReactNode
@@ -31,22 +31,42 @@ interface PageSidebarProps {
   children: React.ReactNode
   className?: string
   side?: 'left' | 'right'
-  collapsed?: boolean
+  ref?: Ref<HTMLDivElement>
 }
 
-export function PageSidebar({
-  children,
-  className,
-  side = 'left',
-  collapsed = true
-}: PageSidebarProps) {
+export function PageSidebar({ children, className, ref, side = 'left' }: PageSidebarProps) {
   return (
-    <motion.aside
-      animate={{ x: collapsed ? '-80%' : '0%' }}
+    <aside
+      ref={ref}
       data-slot="sidebar"
       className={cn(
-        'border-border flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden p-2',
+        'border-border z-20 flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden p-2',
         side === 'left' ? 'border-r' : 'border-l',
+        className
+      )}
+    >
+      {children}
+    </aside>
+  )
+}
+
+interface PageSidebarSubProps {
+  children?: React.ReactElement
+  className?: string
+  // side?: 'left' | 'right'
+  open?: boolean
+}
+
+export function PageSidebarSub({ children, className }: PageSidebarSubProps) {
+  return (
+    <motion.aside
+      initial={{ x: '-100%' }}
+      animate={{ x: '0%' }}
+      transition={{ ease: 'circOut', duration: 0.15 }}
+      data-slot="sidebar-sub"
+      className={cn(
+        'border-border bg-muted z-0 flex h-full max-w-52 min-w-52 flex-1 flex-col overflow-x-hidden p-2',
+        'border-r',
         className
       )}
     >
@@ -68,7 +88,7 @@ export function PageContent({ children, className, ref, onScroll }: PageContentP
       ref={ref}
       onScroll={onScroll}
       data-slot="content"
-      className={cn('flex flex-1 flex-col', className)}
+      className={cn('flex min-w-0 flex-1 flex-col', className)}
     >
       {children}
     </div>
@@ -80,13 +100,18 @@ interface PageTitlebarProps {
   className?: string
 }
 
+interface PageTitlebarButtonGroupProps {
+  children: React.ReactNode
+  className?: string
+  side?: 'right' | 'left'
+}
+
 export function PageTitlebar({ children, className }: PageTitlebarProps) {
   return (
     <div
       data-slot="titlebar"
       className={cn(
-        'flex max-h-14 min-h-14 w-full border-b px-2 py-1.5 text-base font-semibold',
-        'has-data-[slot=button-group]:flex-row has-data-[slot=button-group]:items-center has-data-[slot=button-group]:justify-between',
+        'flex h-14 w-full items-center gap-2 border-b px-4 py-1.5 text-base font-semibold',
         className
       )}
     >
@@ -95,16 +120,21 @@ export function PageTitlebar({ children, className }: PageTitlebarProps) {
   )
 }
 
-interface PageTitlebarButtonGroupProps {
-  children: React.ReactNode
-  className?: string
-}
-
-export function PageTitlebarButtonGroup({ children, className }: PageTitlebarButtonGroupProps) {
+export function PageTitlebarButtonGroup({
+  children,
+  className,
+  side = 'right'
+}: PageTitlebarButtonGroupProps) {
   return (
     <div
       data-slot="button-group"
-      className={cn('flex flex-row items-center space-x-1.5 space-x-2', className)}
+      data-side={side}
+      className={cn(
+        'flex flex-row items-center gap-2',
+        'data-[side=right]:ml-auto',
+        'data-[side=left]:order-second',
+        className
+      )}
     >
       {children}
     </div>

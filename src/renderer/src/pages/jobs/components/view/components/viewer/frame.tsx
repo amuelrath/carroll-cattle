@@ -1,5 +1,5 @@
-import { cn } from '@renderer/lib/utils'
 import { useThisJobStatus } from '@renderer/pages/jobs/components/view/hooks/use-this-job-status'
+import { motion } from 'framer-motion'
 import React, { useEffect, useRef } from 'react'
 
 /* Simple Band-Aid for not having to wait for another frame after re-sub
@@ -14,6 +14,8 @@ export function FramePreview(): React.JSX.Element {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   useEffect(() => {
+    if (!thisIsCurrentJob) return // stop receiving frames, but leave the canvas as-is
+
     const renderer = createFrameRenderer(() => canvasRef.current)
     lastFrame && renderer.push(lastFrame)
     const unsub = window.api.onPortPost('worker:frame', ({ data }) => renderer.push(data))
@@ -23,11 +25,16 @@ export function FramePreview(): React.JSX.Element {
     }
   }, [thisIsCurrentJob])
 
-  if (!thisIsCurrentJob) return <></>
   return (
-    <div className="relative h-full w-full">
-      <canvas ref={canvasRef} className={cn('h-full w-full rounded-md object-contain')} />
-    </div>
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ ease: 'circInOut' }}
+      className="absolute inset-0"
+    >
+      <canvas ref={canvasRef} className="h-full w-full rounded-md object-contain" />
+    </motion.div>
   )
 }
 

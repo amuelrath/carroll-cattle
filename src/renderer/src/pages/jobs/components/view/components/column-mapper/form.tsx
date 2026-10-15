@@ -18,7 +18,6 @@ import {
 } from '@renderer/components/ui/select'
 import { Separator } from '@renderer/components/ui/separator'
 import { Spinner } from '@renderer/components/ui/spinner'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@renderer/components/ui/tooltip'
 import { iconSizes } from '@renderer/lib/tokens'
 import { trpc } from '@renderer/lib/trpc'
 import { cn } from '@renderer/lib/utils'
@@ -38,11 +37,7 @@ import React, { useMemo, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 import { z } from 'zod'
 
-export function ColumnMapperDialog({
-  variant = 'secondary'
-}: {
-  variant?: 'default' | 'secondary'
-}): React.JSX.Element {
+export function ColumnMapperDialog(): React.JSX.Element {
   const { jobId } = useSearch({ from: '/jobs/view/' })
   const [job] = trpc.job.fetchJobWithTasks.useSuspenseQuery({ jobId })
   const upsert = trpc.file.upsertColumnMap.useMutation()
@@ -76,18 +71,16 @@ export function ColumnMapperDialog({
 
   return (
     <Dialog open={open} onOpenChange={(o) => setOpen(o)}>
-      <Tooltip>
-        <TooltipTrigger
-          render={
-            <DialogTrigger
-              render={<Button size="sm" variant={variant} aria-label="Map Columns" />}
-            />
-          }
-        >
-          <ArrowLeftRightIcon {...iconSizes.medium} />
-        </TooltipTrigger>
-        <TooltipContent side="bottom">Map Columns</TooltipContent>
-      </Tooltip>
+      <DialogTrigger
+        render={
+          <div role="group" className="flex h-full">
+            <Button variant="secondary" size="lg" className="text-xs">
+              <ArrowLeftRightIcon {...iconSizes.large} />
+              Map Columns
+            </Button>
+          </div>
+        }
+      />
       <DialogContent className="flex max-h-150 min-h-156.25 min-w-162.5">
         <CustomDialogHeader
           icon={ArrowLeftRightIcon}
