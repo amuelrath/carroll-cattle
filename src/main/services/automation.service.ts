@@ -20,13 +20,12 @@ export interface AutomationEvent extends Record<AutomationEventType, unknown> {
   state: TState
 }
 
-const defaultState: TState = {
+const defaultState = {
   jobId: undefined,
   narration: undefined,
-  speed: 'max',
   status: 'inactive',
   tasks: []
-}
+} as const satisfies Partial<TState>
 
 export const speeds = {
   slow: 1_000,
@@ -37,7 +36,7 @@ export const speeds = {
 export class AutomationService extends WorkerService {
   private currAborter: AbortController | undefined = undefined
   private pauseGate: { promise: Promise<void>; release: () => void } | null = null
-  public state: TState = { ...defaultState }
+  public state: TState = { ...defaultState, speed: 'max' }
 
   constructor(
     private files: FilesRepository,
