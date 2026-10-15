@@ -7,6 +7,7 @@ import type {
   TSheetRow,
   TTaskWithRelations
 } from '@shared/schemas/trpc'
+import { utils, writeFile } from 'xlsx'
 import { z } from 'zod'
 
 export function nonOptionalKeys<T extends z.core.$ZodShape>(schema: z.ZodObject<T>) {
@@ -146,4 +147,12 @@ export function getSheetRow(
   }
 
   return { ...base, state: 'ready' }
+}
+
+export function sheetToJson(rows: TRecord[], title: string) {
+  const ws = utils.json_to_sheet(rows)
+  const wb = utils.book_new()
+  utils.book_append_sheet(wb, ws, 'Sheet1')
+
+  return writeFile(wb, `${title}.xlsx`)
 }
