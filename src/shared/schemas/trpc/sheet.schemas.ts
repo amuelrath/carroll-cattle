@@ -1,4 +1,4 @@
-import { ZJobStatus } from '@shared/db/schema'
+import { ZImageOut, ZJobStatus } from '@shared/db/schema'
 import { ZRecord } from '@shared/schemas/helper.schemas'
 import { z } from 'zod'
 
@@ -91,14 +91,14 @@ const ZRowBase = z.object({
 
 const ZRowIssue = z.object({
   editsSince: z.array(ZCellEdit),
-  screenshot: z.base64(),
+  screenshot: ZImageOut,
   hint: z.string()
 })
 export type TRowIssue = z.infer<typeof ZRowIssue>
 
 const ZRowProof = z.object({
   completedAt: z.date(),
-  screenshot: z.base64()
+  screenshot: ZImageOut
 })
 
 export const ZSheetRow = z.discriminatedUnion('state', [
@@ -108,8 +108,9 @@ export const ZSheetRow = z.discriminatedUnion('state', [
   ZRowBase.extend({ state: z.literal('issueFixed'), issue: ZRowIssue }),
   ZRowBase.extend({ state: z.literal('done'), proof: ZRowProof })
 ])
-export type TSheetRow = z.infer<typeof ZSheetRow>
-export type TRowState = TSheetRow['state']
+export type TSheetRowIn = z.input<typeof ZSheetRow>
+export type TSheetRowOut = z.output<typeof ZSheetRow>
+export type TRowState = TSheetRowOut['state']
 
 export const ZSheetBase = z.object({
   job: z.object({
@@ -131,6 +132,7 @@ export const ZMappedSheet = ZSheetBase.extend({
   columns: z.array(ZColumn),
   rows: z.array(ZSheetRow)
 })
+export type TMappedSheetIn = z.input<typeof ZMappedSheet>
 export type TMappedSheet = z.infer<typeof ZMappedSheet>
 
 export const ZUnmappedSheet = ZSheetBase.extend({

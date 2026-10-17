@@ -1,5 +1,5 @@
 import { ZJobStatus } from '@shared/db/schema'
-import { ZReadIncompleteTasksWithRowsResponse } from '@shared/schemas/trpc/task.schemas'
+import { ZReadIncompleteRes } from '@shared/schemas/trpc/task.schemas'
 import { z } from 'zod'
 
 export const ZStartInput = z.object({
@@ -18,6 +18,6 @@ export const ZState = z.object({
   status: ZJobStatus,
   narration: z.union([z.string(), z.undefined()]),
   jobId: z.union([z.number(), z.undefined()]),
-  tasks: ZReadIncompleteTasksWithRowsResponse
+  tasks: ZReadIncompleteRes
 })
 export type TState = z.infer<typeof ZState>

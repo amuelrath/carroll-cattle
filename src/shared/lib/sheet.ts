@@ -1,12 +1,7 @@
 import { getIssueDetails } from '@shared/lib/get-issue-details'
 import type { TRecord } from '@shared/schemas/helper.schemas'
-import type {
-  TCellEdit,
-  TCellError,
-  TColumn,
-  TSheetRow,
-  TTaskWithRelations
-} from '@shared/schemas/trpc'
+import type { TCellEdit, TCellError, TColumn, TSheetRowIn } from '@shared/schemas/trpc'
+import type { TTaskWithRelationsIn } from '@shared/schemas/trpc/task.schemas'
 import { utils, writeFile } from 'xlsx'
 import { z } from 'zod'
 
@@ -99,10 +94,10 @@ export function projectRow(
 
 // ToDo: Test!
 export function getSheetRow(
-  task: TTaskWithRelations,
+  task: TTaskWithRelationsIn,
   schema: z.ZodObject,
   columnMap: Record<string, string>
-): TSheetRow {
+): TSheetRowIn {
   const {
     id: taskId,
     rowIdx,
@@ -125,7 +120,7 @@ export function getSheetRow(
     return {
       ...base,
       state: 'done',
-      proof: { completedAt: proof.createdAt, screenshot: proof.imgBase64 }
+      proof: { completedAt: proof.createdAt, screenshot: proof.image }
     }
   }
 
@@ -140,8 +135,8 @@ export function getSheetRow(
       state: editsSince.length > 0 ? 'issueFixed' : 'issue',
       issue: {
         editsSince,
-        screenshot: issue.imgBase64,
-        hint: issue.desc
+        screenshot: issue.image,
+        hint: issue.hint
       }
     }
   }

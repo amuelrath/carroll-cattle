@@ -1,5 +1,5 @@
+import 'source-map-support/register'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { startUtility } from '@main/core/start-utility'
 import { getDb } from '@main/db'
 import { runMigrations } from '@main/lib/migrations'
 import { app, BrowserWindow } from 'electron'

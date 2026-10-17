@@ -1,48 +1,84 @@
-import { type AppError, isAppError, ToastableError } from '@shared/errors'
+import logger from '@main/logger'
+import { causeChain } from '@main/trpc/cause-chain'
+import { type AppError, type ErrorToast, isAppError } from '@shared/errors'
 import { initTRPC } from '@trpc/server'
+import { performance } from 'node:perf_hooks'
 import superjson from 'superjson'
 import type { Context } from './context'
 
-interface ErrorData {
-  type?: AppError['type']
-  toast?: string
-  causes?: unknown
+function findTypedArrays(v: unknown, path = '$', seen = new WeakSet()): string[] {
+  if (v === null || typeof v !== 'object') return []
+  if (ArrayBuffer.isView(v)) return [`${path} (${v.constructor.name})`]
+  if (seen.has(v)) return []
+  seen.add(v)
+  return Object.entries(v).flatMap(([k, x]) => findTypedArrays(x, `${path}.${k}`, seen))
 }
 
-type CauseEntry = { name: string; message: string; stack?: string; context?: unknown }
-export function causeChain(err: unknown): CauseEntry[] {
-  const out: CauseEntry[] = []
-  let cur = err
-  while (cur instanceof Error && out.length < 10) {
-    out.push({
-      name: cur.name,
-      message: cur.message,
-      // stack: cur.stack,
-      context: cur instanceof ToastableError ? cur.context : undefined
-    })
-    cur = cur.cause
+// e.g. in the middleware after `const result = await next()`:
+
+interface ErrorData {
+  type?: AppError['type']
+  toast?: ErrorToast
+  cause?: unknown
+}
+
+const debugTransformer = {
+  input: superjson,
+  output: {
+    serialize: (value: unknown) => {
+      const hits = findTypedArrays(value)
+      if (hits.length) console.warn('[trpc] typed arrays in outbound payload:', hits)
+      return superjson.serialize(value)
+    },
+    deserialize: superjson.deserialize
   }
-  return out
 }
 
 const t = initTRPC.context<Context>().create({
   // gets forwarded to any onError
   // go to responseLink() to shape the logs
   errorFormatter({ shape, error }) {
-    const cause =
-      error.cause instanceof ToastableError && isAppError(error.cause) ? error.cause : undefined
+    const cause = error.cause && isAppError(error.cause) ? error.cause : undefined
     return {
       ...shape,
       data: {
         ...shape.data,
         type: cause?.type,
         toast: cause?.toast,
-        causes: causeChain(error.cause)
+        cause: error.cause
       } satisfies ErrorData & typeof shape.data
     }
   },
-  transformer: superjson
+  transformer: debugTransformer
+})
+
+const logged = t.middleware(async ({ path, input, next }) => {
+  const requestId = crypto.randomUUID()
+  const start = performance.now()
+
+  const result = await next({ ctx: { requestId } })
+
+  if (result.ok) {
+    const hits = findTypedArrays(result.data)
+    if (hits.length) console.warn(path, hits)
+  }
+
+  if (!result.ok) {
+    logger.error({
+      message:
+        isAppError(result.error.cause) ? result.error.message
+        : Error.isError(result.error) ? result.error.message
+        : 'Unknown',
+      requestId,
+      path,
+      durationMs: Math.round(performance.now() - start),
+      input,
+      errorType: isAppError(result.error.cause) ? result.error.cause : 'UNEXPECTED',
+      cause: causeChain(result.error.cause)
+    })
+  }
+  return result
 })
 
 export const router = t.router
-export const procedure = t.procedure
+export const procedure = t.procedure.use(logged)

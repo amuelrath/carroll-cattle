@@ -20,3 +20,7 @@ export function __setDbForTesting(testDb: DrizzleDb) {
 }
 
 export type DrizzleDb = ReturnType<typeof drizzle<typeof relations>>
+
+export type Tx = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0]
+
+export type Executor = DrizzleDb | Tx

@@ -98,6 +98,7 @@ const openMostRecentCheck = function* (scope) {
 
 const fillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
   yield narr('Entering data...')
+  console.log('ENTERING DATA', row)
 
   const { pregCheckForm: form } = scope
 

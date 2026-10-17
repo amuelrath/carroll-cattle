@@ -39,7 +39,7 @@ import { z } from 'zod'
 
 export function ColumnMapperDialog(): React.JSX.Element {
   const { jobId } = useSearch({ from: '/jobs/view/' })
-  const [job] = trpc.job.fetchJobWithTasks.useSuspenseQuery({ jobId })
+  const [job] = trpc.job.readJobWithTasks.useSuspenseQuery({ jobId })
   const upsert = trpc.file.upsertColumnMap.useMutation()
   const utils = trpc.useUtils()
 
@@ -63,7 +63,7 @@ export function ColumnMapperDialog(): React.JSX.Element {
       fileId: job.file.id,
       columnMap: data
     })
-    await utils.job.fetchJobWithTasks.refetch({ jobId })
+    await utils.job.readJobWithTasks.refetch({ jobId })
     await utils.sheet.getSheet.refetch({ jobId })
     setOpen(false)
     return

@@ -2,9 +2,16 @@ import { type TRecord, ZRecord } from '@shared/schemas/helper.schemas'
 import { type TProcessId, ZProcessId } from '@shared/schemas/jobs'
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { defineRelations } from 'drizzle-orm/relations'
-import { foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
 import { createSelectSchema } from 'drizzle-orm/zod'
 import { z } from 'zod'
+
+export const ZImageOut = z.union([
+  z.string(),
+  z
+    .custom<Uint8Array<ArrayBufferLike>>((v) => v instanceof Uint8Array, 'Expected Uint8Array')
+    .transform((b) => Buffer.from(b.buffer, b.byteOffset, b.byteLength).toString('base64'))
+])
 
 export const ZJobStatus = z.enum(['active', 'inactive', 'paused', 'complete'])
 export type TJobStatus = z.infer<typeof ZJobStatus>
@@ -116,22 +123,24 @@ export const taskProofs = sqliteTable('taskProofs', {
   taskId: int()
     .primaryKey()
     .references(() => tasks.id, { onDelete: 'cascade' }),
-  imgBase64: text().notNull(),
+  image: blob({ mode: 'buffer' }).notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date())
 })
 export type TSelectTaskProof = InferSelectModel<typeof taskProofs>
 export type TInsertTaskProof = InferInsertModel<typeof taskProofs>
-export const ZSelectTaskProof = createSelectSchema(taskProofs)
+export const ZSelectTaskProof = createSelectSchema(taskProofs, {
+  image: ZImageOut
+})
 
 export const taskIssues = sqliteTable('taskIssues', {
   taskId: int()
     .primaryKey()
     .references(() => tasks.id, { onDelete: 'cascade' }),
   rowSnapshot: text({ mode: 'json' }).$type<TRecord>().notNull(),
-  imgBase64: text().notNull(),
-  desc: text().notNull(),
+  image: blob({ mode: 'buffer' }).notNull(),
+  hint: text().notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date())
@@ -139,7 +148,8 @@ export const taskIssues = sqliteTable('taskIssues', {
 export type TSelectTaskIssue = InferSelectModel<typeof taskIssues>
 export type TInsertTaskIssue = InferInsertModel<typeof taskIssues>
 export const ZSelectTaskIssue = createSelectSchema(taskIssues, {
-  rowSnapshot: ZRecord
+  rowSnapshot: ZRecord,
+  image: ZImageOut
 })
 
 export const relations = defineRelations(
@@ -156,11 +166,13 @@ export const relations = defineRelations(
     jobs: {
       process: r.one.processes({
         from: r.jobs.processId,
-        to: r.processes.id
+        to: r.processes.id,
+        optional: false
       }),
       file: r.one.files({
         from: r.jobs.fileId,
-        to: r.files.id
+        to: r.files.id,
+        optional: false
       }),
       tasks: r.many.tasks({
         from: r.jobs.id,
@@ -180,17 +192,20 @@ export const relations = defineRelations(
     fileRows: {
       file: r.one.files({
         from: r.fileRows.fileId,
-        to: r.files.id
+        to: r.files.id,
+        optional: false
       })
     },
     tasks: {
       row: r.one.fileRows({
         from: [r.tasks.fileId, r.tasks.rowIdx],
-        to: [r.fileRows.fileId, r.fileRows.rowIdx]
+        to: [r.fileRows.fileId, r.fileRows.rowIdx],
+        optional: false
       }),
       job: r.one.jobs({
         from: r.tasks.jobId,
-        to: r.jobs.id
+        to: r.jobs.id,
+        optional: false
       }),
       proof: r.one.taskProofs({
         from: r.tasks.id,

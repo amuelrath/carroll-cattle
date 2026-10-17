@@ -4,13 +4,11 @@ import { Result, type ResultAsync } from 'neverthrow'
 
 const CODE_MAP = {
   NOT_FOUND: 'NOT_FOUND',
-  SHELL: 'BAD_REQUEST',
   DATABASE: 'INTERNAL_SERVER_ERROR',
-  SHEET: 'INTERNAL_SERVER_ERROR',
-  JOB: 'INTERNAL_SERVER_ERROR',
-  DIALOG: 'UNPROCESSABLE_CONTENT',
   AUTOMATION: 'INTERNAL_SERVER_ERROR',
-  FLOW: 'INTERNAL_SERVER_ERROR'
+  NOT_ALLOWED: 'FORBIDDEN',
+  PARSE: 'UNPROCESSABLE_CONTENT',
+  UNKNOWN: 'INTERNAL_SERVER_ERROR'
 } satisfies Record<AppError['type'], TRPCError['code']>
 
 export async function unwrap<T>(

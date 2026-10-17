@@ -1,49 +1,43 @@
+import type { Executor } from '@main/db'
 import { pathExists } from '@main/lib/path-exists'
 import { getSheet, getWorkbookSheetNamesAndHeads, readWorkbook } from '@main/lib/workbook'
-import { JobsRepository } from '@main/repositories'
-import { DatabaseError, NotFoundError, SheetError, toAppError } from '@shared/errors'
+import { fromDb, jobsRepo } from '@main/repositories'
+import { NotFoundError } from '@shared/errors'
 import { getColumns, getSheetRow } from '@shared/lib/sheet'
 import { uploadSchemas } from '@shared/schemas/jobs'
 import type {
   TFetchSheetInput,
-  TFetchSheetResponse,
   TGetSheetInput,
-  TMappedSheet,
+  TMappedSheetIn,
   TPreviewSheetInput,
-  TSheet,
-  TSheetPreviewResponse,
   TUnmappedSheet
 } from '@shared/schemas/trpc'
-import { err, ok, Result, type ResultAsync, safeTry } from 'neverthrow'
+import { err, ok, safeTry } from 'neverthrow'
 
 export class SheetService {
-  constructor(private jobs: JobsRepository) {}
+  constructor(private db: Executor) {}
 
-  previewSheetsFromDisk(
-    input: TPreviewSheetInput
-  ): Result<TSheetPreviewResponse['sheets'], SheetError> {
+  previewSheetsFromDisk(input: TPreviewSheetInput) {
     const { filePath } = input
     return pathExists({ filePath })
       .andThen(() => readWorkbook({ filePath }))
       .map((workbook) => getWorkbookSheetNamesAndHeads({ workbook }))
-      .mapErr((err) => toAppError(err, SheetError))
   }
 
-  fetchSheetFromDisk(input: TFetchSheetInput): Result<TFetchSheetResponse['rows'], SheetError> {
+  fetchSheetFromDisk(input: TFetchSheetInput) {
     const { sheetName, filePath } = input
 
     return pathExists({ filePath })
       .andThen(() => readWorkbook({ filePath }))
       .map((workbook) => getSheet({ workbook, sheetName }))
-      .mapErr((err) => toAppError(err, SheetError))
   }
 
-  getSheet(input: TGetSheetInput): ResultAsync<TSheet, DatabaseError | NotFoundError> {
+  getSheet(input: TGetSheetInput) {
     const { jobId } = input
-    const { jobs } = this
+    const { db } = this
 
     return safeTry(async function* () {
-      const job = yield* await jobs.readJobWithTasks(jobId)
+      const job = yield* fromDb(jobsRepo.readOneWithTasks(db, jobId))
       if (!job) return err(new NotFoundError(`Job ${jobId} not found.`))
 
       if (!job.file.columnMap) {
@@ -70,7 +64,7 @@ export class SheetService {
         file: job.file,
         columns: getColumns(job.file.columnMap, schema),
         rows: job.tasks.map((task) => getSheetRow(task, schema, columnMap))
-      } satisfies TMappedSheet)
+      } satisfies TMappedSheetIn)
     })
   }
 }

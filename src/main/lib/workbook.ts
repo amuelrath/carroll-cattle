@@ -1,5 +1,4 @@
-import { SheetError } from '@shared/errors'
-import { errors } from '@shared/resources/strings'
+import { ParseError } from '@shared/errors'
 import type { TFetchSheetResponse, TSheetPreviewResponse } from '@shared/schemas/trpc'
 import { Result } from 'neverthrow'
 import XLSX from 'xlsx'
@@ -8,10 +7,18 @@ export function readWorkbook({
   filePath
 }: {
   filePath: string
-}): Result<XLSX.WorkBook, SheetError> {
+}): Result<XLSX.WorkBook, ParseError> {
   return Result.fromThrowable(
     () => XLSX.readFile(filePath, { cellDates: true, raw: false }),
-    (cause) => new SheetError(`File couldn't be read.`, { cause, toast: errors.unreadableFile })
+    (cause) =>
+      new ParseError(`File at "${filePath}" couldn't be read.`, {
+        cause,
+        toast: {
+          type: 'error',
+          title: 'Error Reading File',
+          description: 'That file could not be read.'
+        }
+      })
   )()
 }
 

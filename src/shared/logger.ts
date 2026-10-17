@@ -1,4 +1,3 @@
-import type { AppError } from '@shared/errors'
 import { type LogFunctions } from 'electron-log'
 
 interface BaseLogArguments {
@@ -17,11 +16,11 @@ interface ClientLogErrorArguments extends BaseLogErrorArguments {
 }
 
 interface MainLogErrorArguments extends BaseLogErrorArguments {
-  process: '[main]'
-  /* The TRPC function name */
-  call: `[${string}]`
-  params: string
-  type?: AppError['type']
+  requestId: string
+  path: string
+  durationMs: number
+  input: unknown
+  errorType: unknown
 }
 
 type LogErrorArguments = ClientLogErrorArguments | MainLogErrorArguments

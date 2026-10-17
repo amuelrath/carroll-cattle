@@ -30,10 +30,10 @@ export function ViewPage(): React.JSX.Element {
 
   useEffect(() => {
     if (shouldRefetch) {
-      utils.job.fetchJobWithTasks.refetch({ jobId: shouldRefetch.jobId }).then(() => undefined)
+      utils.job.readJobWithTasks.refetch({ jobId: shouldRefetch.jobId }).then(() => undefined)
       utils.sheet.getSheet.refetch({ jobId: shouldRefetch.jobId }).then(() => undefined)
     }
-  }, [shouldRefetch, utils.job.fetchJobWithTasks, utils.sheet.getSheet])
+  }, [shouldRefetch, utils.job.readJobWithTasks, utils.sheet.getSheet])
 
   return (
     <Page direction="vertical">
