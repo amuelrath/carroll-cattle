@@ -6,7 +6,8 @@ import {
   ZCreateJobInput,
   ZJobIdInput,
   ZReadAllJobsRes,
-  ZReadJobWithTasksRes
+  ZReadJobWithTasksRes,
+  ZRenameJobInput
 } from '@shared/schemas/trpc'
 
 import { procedure, router } from '../trpc'
@@ -16,14 +17,20 @@ export const jobRouter = router({
     const res = await unwrap(jobService.createJob(input))
     return ZJobIdInput.parse(res)
   }),
-  readAllJobs: procedure.query(async (): Promise<TReadAllJobsRes> => {
-    const res = await unwrap(jobService.readAllJobs())
-    return ZReadAllJobsRes.parse(res)
-  }),
   readJobWithTasks: procedure
     .input(ZJobIdInput)
     .query(async ({ input }): Promise<TReadJobWithTasksRes | undefined> => {
       const res = await unwrap(jobService.readJobWithTasks(input))
       return ZReadJobWithTasksRes.parse(res)
-    })
+    }),
+  readAllJobs: procedure.query(async (): Promise<TReadAllJobsRes> => {
+    const res = await unwrap(jobService.readAllJobs())
+    return ZReadAllJobsRes.parse(res)
+  }),
+  deleteJob: procedure.input(ZJobIdInput).mutation(async ({ input }) => {
+    return await unwrap(jobService.deleteJob(input))
+  }),
+  renameJob: procedure.input(ZRenameJobInput).mutation(async ({ input }) => {
+    return await unwrap(jobService.renameJob(input))
+  })
 })

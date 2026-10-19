@@ -42,3 +42,9 @@ export const ZReadAllJobsRes = z.array(
   })
 )
 export type TReadAllJobsRes = z.infer<typeof ZReadAllJobsRes>
+
+export const ZRenameJobInput = z.object({
+  jobId: z.number(),
+  title: z.string().min(1)
+})
+export type TRenameJobInput = z.infer<typeof ZRenameJobInput>

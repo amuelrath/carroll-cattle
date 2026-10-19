@@ -43,14 +43,29 @@ export const jobsRepo = {
     })
   },
   /* Get all jobs with their process and file */
-  readAll: async (db: Executor) => {
+  readRecent: async (db: Executor) => {
     return await db.query.jobs.findMany({
       with: {
         process: true,
         file: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      limit: 7
+    })
+  },
+
+  readAll: (db: Executor) => {
+    return db.query.jobs.findMany({
+      with: {
+        process: true,
+        file: true,
+        tasks: true
       }
     })
   },
+
   update: async (db: Executor, input: { jobId: TSelectJob['id']; data: Partial<TInsertJob> }) => {
     return await db.update(jobs).set(input.data).where(eq(jobs.id, input.jobId))
   },

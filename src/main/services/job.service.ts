@@ -12,7 +12,12 @@ import type {
 } from '@shared/db/schema'
 import { DatabaseError, NotAllowedError, NotFoundError } from '@shared/errors'
 import { TRecord } from '@shared/schemas/helper.schemas'
-import type { TCreateJobInput, TJobIdInput, TReadAllJobsRes } from '@shared/schemas/trpc'
+import type {
+  TCreateJobInput,
+  TJobIdInput,
+  TReadAllJobsRes,
+  TRenameJobInput
+} from '@shared/schemas/trpc'
 import type { ResultAsync } from 'neverthrow'
 import path from 'path'
 
@@ -25,13 +30,13 @@ export class JobService {
   createJob(input: TCreateJobInput) {
     const { filePath, sheetName, processId } = input
     const fileName = path.parse(filePath).name
-    const file = { fileName, sheetName }
+    const file = { fileName, sheetName, filePath }
     return this.sheetService.fetchSheetFromDisk({ filePath, sheetName }).asyncAndThen((rows) =>
       fromDb(
         this.db.transaction(async (tx) => {
           const fileId = await filesRepo.insert(tx, file)
           const insertedRows = await fileRowsRepo.insertMany(tx, toRowInserts(fileId, rows))
-          const jobId = await jobsRepo.insert(tx, { fileId, processId })
+          const jobId = await jobsRepo.insert(tx, { fileId, processId, title: sheetName })
           await tasksRepo.insertMany(tx, toTaskInserts(jobId, insertedRows))
           return { jobId }
         })
@@ -63,6 +68,11 @@ export class JobService {
         await jobsRepo.update(tx, { jobId, data: { status } })
       })
     )
+  }
+
+  renameJob(input: TRenameJobInput) {
+    const { jobId, title } = input
+    return fromDb(jobsRepo.update(this.db, { jobId, data: { title } }))
   }
 }
 

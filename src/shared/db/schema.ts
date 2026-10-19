@@ -34,6 +34,7 @@ export const files = sqliteTable('files', {
   id: int().primaryKey({ autoIncrement: true }),
   fileName: text().notNull(),
   sheetName: text().notNull(),
+  filePath: text().notNull(), // filePath at time of upload. Could change.
   columnMap: text({ mode: 'json' }).$type<Record<string, string>>(),
   uploadedAt: int({ mode: 'timestamp_ms' })
     .notNull()
@@ -66,6 +67,7 @@ export const ZSelectFileRow = createSelectSchema(fileRows, {
 
 export const jobs = sqliteTable('jobs', {
   id: int().primaryKey({ autoIncrement: true }),
+  title: text().notNull(),
   status: text().$type<TJobStatus>().notNull().default('inactive'),
   processId: text()
     .notNull()
