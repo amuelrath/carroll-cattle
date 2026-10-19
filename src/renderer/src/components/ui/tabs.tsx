@@ -85,27 +85,39 @@ function TabsContent({ className, ...props }: TabsPrimitive.Panel.Props) {
 
 interface CustomTabTriggerProps {
   value: string
-  Icon: LucideIcon
+  Icon?: LucideIcon
   label: string
   children?: React.ReactNode
+  className?: string
+  onClick?: () => void
 }
 
-function CustomTabTrigger({
-  value,
+function CustomTabsTrigger({
   Icon,
   label,
-  children
+  children,
+  value,
+  onClick
 }: CustomTabTriggerProps): React.JSX.Element {
   return (
-    <TabsTrigger className="group/trigger flex flex-row items-center justify-between" value={value}>
+    <TabsTrigger
+      onClick={onClick ? () => onClick() : () => undefined}
+      value={value}
+      className="group/trigger flex flex-row items-center justify-between"
+    >
       <div className="flex flex-row items-center space-x-2">
         <div className="relative items-center justify-center">
-          <span className="bg-muted group-data-active/trigger:border-border absolute -top-1 -left-1 size-6 rounded-full group-data-active/trigger:border group-data-active/trigger:bg-white" />
-          <Icon
-            className="group-data-active/trigger:text-primary relative z-10"
-            size={iconSizes.medium.size}
-            strokeWidth={iconSizes.medium.strokeWidth}
-          />
+          {Icon && (
+            <>
+              <span className="bg-muted group-data-active/trigger:border-border absolute -top-1 -left-1 size-6 rounded-full group-data-active/trigger:border group-data-active/trigger:bg-white" />
+
+              <Icon
+                className="group-data-active/trigger:text-primary relative z-10"
+                size={iconSizes.medium.size}
+                strokeWidth={iconSizes.medium.strokeWidth}
+              />
+            </>
+          )}
         </div>
         <span>{label}</span>
       </div>
@@ -114,4 +126,4 @@ function CustomTabTrigger({
   )
 }
 
-export { Tabs, TabsList, TabsTrigger, TabsContent, CustomTabTrigger, tabsListVariants }
+export { Tabs, TabsList, TabsTrigger, TabsContent, CustomTabsTrigger, tabsListVariants }

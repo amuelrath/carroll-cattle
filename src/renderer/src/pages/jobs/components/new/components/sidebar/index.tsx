@@ -1,4 +1,4 @@
-import { CustomTabTrigger, TabsList } from '@renderer/components/ui/tabs'
+import { CustomTabsTrigger, TabsList } from '@renderer/components/ui/tabs'
 import { trpc } from '@renderer/lib/trpc'
 import React from 'react'
 import { processIcons } from './_copy'
@@ -13,7 +13,7 @@ export function JobSidebar(): React.JSX.Element {
       : data.map((process) => {
           const Icon = processIcons[process.id]
           return (
-            <CustomTabTrigger
+            <CustomTabsTrigger
               key={process.id}
               value={process.id}
               Icon={Icon}

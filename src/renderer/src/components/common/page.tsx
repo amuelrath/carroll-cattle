@@ -111,7 +111,7 @@ export function PageTitlebar({ children, className }: PageTitlebarProps) {
     <div
       data-slot="titlebar"
       className={cn(
-        'flex h-14 w-full items-center gap-2 border-b px-4 py-1.5 text-base font-semibold',
+        'flex h-20 w-full items-center gap-2 border-b px-4 py-1.5 text-base font-semibold',
         className
       )}
     >
