@@ -22,8 +22,12 @@ const iconStyles = {
 
 export function PlayPauseButton(): React.JSX.Element {
   const { jobId, currJobId, thisIsCurrentJob, thisJobStatus } = useThisJobStatus()
-
-  const { mutateAsync: mutateStart } = trpc.automation.start.useMutation()
+  const utils = trpc.useUtils()
+  const { mutateAsync: mutateStart } = trpc.automation.start.useMutation({
+    onSettled: async () => {
+      await utils.job.readAllJobs.refetch()
+    }
+  })
   const { mutateAsync: mutatePause } = trpc.automation.pause.useMutation()
   const { mutateAsync: mutateResume } = trpc.automation.resume.useMutation()
 

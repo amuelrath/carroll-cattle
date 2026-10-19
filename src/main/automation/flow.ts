@@ -55,6 +55,7 @@ export async function runFlow<K extends TProcessId>(
 
   for (const [index, row] of rows.entries()) {
     try {
+      await h.onStart(index)
       const { screenshot } = await drive(flow.row(row, index), h)
       await h.onCommit(index, screenshot)
     } catch (e) {

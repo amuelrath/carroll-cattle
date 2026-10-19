@@ -97,16 +97,10 @@ export class AutomationService extends WorkerService {
 
       await runFlow(processId, rows, {
         request: this.request,
-        onIssue: async (idx, issue, screenshot) => {
+        onStart: async (idx) => {
           const task = this.state.tasks[idx]
-          if (!task.row) throw new Error('Tried accessing a task that did not exist.')
-          const res = await this.tasks.upsertIssue({
-            taskId: task.id,
-            hint: issue.message,
-            screenshot
-          })
-          if (res.isErr()) throw res.error
-          this.emission('refetch', { jobId, idx })
+          const taskUpdateRes = await this.tasks.startTask(task.id)
+          if (taskUpdateRes.isErr()) throw taskUpdateRes.error
         },
         onCommit: async (idx, screenshot) => {
           const task = this.state.tasks[idx]
@@ -116,6 +110,17 @@ export class AutomationService extends WorkerService {
           })
           task.status = 'done'
           if (taskUpdateRes.isErr()) throw taskUpdateRes.error
+          this.emission('refetch', { jobId, idx })
+        },
+        onIssue: async (idx, issue, screenshot) => {
+          const task = this.state.tasks[idx]
+          if (!task.row) throw new Error('Tried accessing a task that did not exist.')
+          const res = await this.tasks.upsertIssue({
+            taskId: task.id,
+            hint: issue.message,
+            screenshot
+          })
+          if (res.isErr()) throw res.error
           this.emission('refetch', { jobId, idx })
         },
         onWarn: async (warning) => {

@@ -1,7 +1,6 @@
 import { Page, PageContent } from '@renderer/components/common/page'
 import React from 'react'
-import { ActiveSection } from './components/active'
-import { RecentSection } from './components/recent'
+import { AutomationsSection } from './components/automations'
 
 export function JobsPage(): React.JSX.Element {
   return (

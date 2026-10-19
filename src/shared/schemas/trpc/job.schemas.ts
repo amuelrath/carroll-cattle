@@ -38,7 +38,8 @@ export type TReadJobWithTasksRes = z.infer<typeof ZReadJobWithTasksRes>
 export const ZReadAllJobsRes = z.array(
   ZSelectJob.extend({
     file: ZSelectFile,
-    process: ZSelectProcess
+    process: ZSelectProcess,
+    tasks: z.array(ZSelectTask)
   })
 )
 export type TReadAllJobsRes = z.infer<typeof ZReadAllJobsRes>

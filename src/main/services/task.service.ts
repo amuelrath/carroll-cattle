@@ -15,6 +15,18 @@ export class TaskService {
     return fromDb(tasksRepo.readIncomplete(this.db, input))
   }
 
+  startTask(input: TSelectTask['id']) {
+    return fromDb(
+      this.db.transaction(async (tx) => {
+        const task = await tasksRepo.readOne(tx, input)
+        assertTaskExists(task)
+
+        assertTaskIncomplete(task)
+        await tasksRepo.update(tx, { taskId: input, data: { startedAt: new Date() } })
+      })
+    )
+  }
+
   commitTask(input: { taskId: TSelectTask['id']; screenshot: string }) {
     const { taskId, screenshot } = input
     return fromDb<void, DatabaseError | NotFoundError | NotAllowedError>(
@@ -25,7 +37,7 @@ export class TaskService {
         const job = await jobsRepo.readOne(tx, task.jobId)
         assertJobExists(job)
 
-        assertCanCommitTask(job, task)
+        assertJobAndTaskIncomplete(job, task)
         await tasksRepo.update(tx, { taskId, data: { status: 'done', completedAt: new Date() } })
 
         // now add the proof
@@ -56,7 +68,7 @@ export class TaskService {
         const rowSnapshot = task.row.copyRow
         const image = base64ToBuffer(screenshot)
 
-        assertCanAddIssue(task)
+        assertTaskIncomplete(task)
         await taskIssuesRepo.insert(tx, {
           taskId,
           image,
@@ -68,7 +80,8 @@ export class TaskService {
   }
 }
 
-function assertCanCommitTask(job: TSelectJob, task: TSelectTask): void {
+/* Ensure neither the job nor task is complete */
+function assertJobAndTaskIncomplete(job: TSelectJob, task: TSelectTask): void {
   if (job.status === 'complete') {
     throw new NotAllowedError('Cannot commit task: job already complete.')
   }
@@ -77,7 +90,8 @@ function assertCanCommitTask(job: TSelectJob, task: TSelectTask): void {
   }
 }
 
-function assertCanAddIssue(task: TSelectTask): void {
+/* Ensure task is not complete */
+function assertTaskIncomplete(task: TSelectTask): void {
   if (task.status === 'done') {
     throw new NotAllowedError('Cannot add issue: task already done.')
   }
