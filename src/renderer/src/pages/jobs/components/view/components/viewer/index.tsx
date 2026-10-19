@@ -13,8 +13,8 @@ import { Narrator } from './narrator'
 const MotionDot = motion.create(Dot)
 
 export function Viewer(): React.JSX.Element {
-  const { thisJobStatus } = useThisJobStatus()
-  const percent = useJobProgress()
+  const { thisJobStatus, jobId } = useThisJobStatus()
+  const percent = useJobProgress({ jobId })
   const isInactive = thisJobStatus === 'inactive' || thisJobStatus === 'complete'
   const isPaused = thisJobStatus === 'paused'
   return (

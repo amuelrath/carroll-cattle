@@ -1,14 +1,13 @@
 import { trpc } from '@renderer/lib/trpc'
-import { useSearch } from '@tanstack/react-router'
 import { useMemo } from 'react'
 
-export function useJobProgress() {
-  const { jobId } = useSearch({ from: '/jobs/view/' })
-  const { data } = trpc.job.fetchJobWithTasks.useQuery({ jobId })
+export function useJobProgress({ jobId }: { jobId: number }) {
+  const { data } = trpc.job.readJobWithTasks.useQuery({ jobId })
 
   return useMemo(() => {
-    const numTasks = data?.tasks.length || 0
-    const numComplete = data?.tasks.filter((t) => t.status === 'done')?.length || 0
-    return (numComplete / numTasks) * 100
+    const tasks = data?.tasks ?? []
+    if (tasks.length === 0) return 0
+    const numComplete = tasks.filter((t) => t.status === 'done').length
+    return (numComplete / tasks.length) * 100
   }, [data])
 }
