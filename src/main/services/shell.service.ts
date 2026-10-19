@@ -5,7 +5,7 @@ import { shell } from 'electron'
 import { err, fromSafePromise, ok } from 'neverthrow'
 
 export class ShellService {
-  getFileName({ filePath }: TOpenPathInput) {
+  open({ filePath }: TOpenPathInput) {
     return pathExists({ filePath })
       .asyncAndThen(() =>
         fromSafePromise(shell.openPath(filePath)).andThen((res) =>
