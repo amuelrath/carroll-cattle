@@ -40,6 +40,19 @@ function BitmapCanvas({
   return <canvas ref={canvasRef} {...props} />
 }
 
+export function ImageFromBase64({
+  image,
+  alt,
+  className
+}: {
+  image: string
+  alt?: string
+  className?: string
+}) {
+  const bitmap = useImageBitmap(image)
+  return <BitmapCanvas bitmap={bitmap} role="img" aria-label={alt} className={className} />
+}
+
 interface Base64ImageProps {
   imgString: string
   alt?: string
