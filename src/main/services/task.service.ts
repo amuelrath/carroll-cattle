@@ -69,6 +69,11 @@ export class TaskService {
         const image = base64ToBuffer(screenshot)
 
         assertTaskIncomplete(task)
+        await tasksRepo.update(tx, {
+          taskId,
+          data: { status: 'issue' }
+        })
+
         await taskIssuesRepo.insert(tx, {
           taskId,
           image,
