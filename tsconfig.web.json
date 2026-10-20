@@ -3,10 +3,9 @@
   "include": [
     "src/renderer/src/env.d.ts",
     "src/renderer/src/**/*",
-    "src/renderer/src/**/*.tsx",
     "src/preload/*.d.ts",
     "src/shared/**/*",
-    "src/main/**/*",
+    "src/main/**/*"
   ],
   "compilerOptions": {
     "composite": true,
@@ -22,9 +21,9 @@
       "@preload/*": [
         "./src/preload/*"
       ],
-      "@shared/*" : [
+      "@shared/*": [
         "./src/shared/*"
-      ],
+      ]
     }
   }
 }

@@ -9,7 +9,6 @@
     }
   ],
   "compilerOptions": {
-    "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
       "@renderer/*": [
@@ -21,9 +20,12 @@
       "@preload/*": [
         "./src/preload/*"
       ],
-      "@shared/*" : [
+      "@shared/*": [
         "./src/shared/*"
       ],
+      "@utility/*": [
+        "./src/utility/*"
+      ]
     }
   }
 }

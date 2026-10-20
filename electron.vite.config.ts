@@ -1,21 +1,37 @@
-import { resolve } from 'path'
-import { defineConfig } from 'electron-vite'
-import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
+import { tanstackRouter } from '@tanstack/router-plugin/vite'
+import react from '@vitejs/plugin-react'
+import { defineConfig } from 'electron-vite'
+import { resolve } from 'path'
 
 export default defineConfig({
   main: {
     resolve: {
       alias: {
-        '@shared': resolve('src/shared')
+        '@main': resolve('src/main'),
+        '@shared': resolve('src/shared'),
+        '@utility': resolve('src/utility')
+      }
+    },
+    build: {
+      sourcemap: true,
+      rollupOptions: {
+        input: {
+          index: resolve('src/main/index.ts'),
+          worker: resolve('src/utility/index.ts')
+        }
       }
     }
   },
   preload: {
     resolve: {
       alias: {
-        '@shared': resolve('src/shared')
+        '@shared': resolve('src/shared'),
+        '@preload': resolve('src/preload')
       }
+    },
+    build: {
+      sourcemap: true
     }
   },
   renderer: {
@@ -25,6 +41,15 @@ export default defineConfig({
         '@shared': resolve('src/shared')
       }
     },
-    plugins: [react(), tailwindcss()]
+    plugins: [
+      tanstackRouter({
+        target: 'react',
+        autoCodeSplitting: true,
+        routesDirectory: 'src/routes',
+        generatedRouteTree: 'src/routeTree.gen.ts'
+      }),
+      react(),
+      tailwindcss()
+    ]
   }
 })

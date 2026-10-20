@@ -1,25 +1,32 @@
-import React from 'react'
 import { trpc } from '@renderer/lib/trpc'
-import { Button } from '../ui/button'
+import { capitalize } from '@shared/lib/strings'
+import { useRouterState } from '@tanstack/react-router'
 import { ArrowLeftIcon, ArrowRightIcon, MinusIcon, SquareIcon, XIcon } from 'lucide-react'
-import { Location, useNavigate } from 'react-router-dom'
-import { useLocation } from 'react-router-dom'
-import { capitalize } from '@renderer/lib/helpers'
+import React from 'react'
+import { Button } from '../ui/button'
 
-const formatLocation = (loc: Location<unknown>): string => {
-  return capitalize(loc.pathname.split('/')[1])
+const formatLocation = (pathname: string): string[] => {
+  const cleanPath = pathname.split('?')[0]
+  const segments = cleanPath.split('/').filter(Boolean)
+
+  return segments.map((r, idx) =>
+    idx === segments.length - 1 ? capitalize(r) : capitalize(r) + ' > '
+  )
 }
 
 function TitleBar(): React.JSX.Element {
-  const navigate = useNavigate()
-  const location = useLocation()
+  const pathname = useRouterState({ select: (s) => s.location.pathname })
+
+  const { mutate: minimize } = trpc.window.minimize.useMutation()
+  const { mutate: maximize } = trpc.window.maximize.useMutation()
+  const { mutate: close } = trpc.window.close.useMutation()
 
   return (
     <header className="z-10 flex h-10 w-full shrink-0 justify-between bg-transparent pl-10 select-none [-webkit-app-region:drag]">
       <div className="flex shrink-0 items-center">
         <nav className="flex items-center justify-center [-webkit-app-region:no-drag]">
           <Button
-            onClick={() => navigate(-1)}
+            onClick={() => window.history.back()}
             data-test-id="nav-back"
             variant="ghost"
             size="sm"
@@ -28,7 +35,7 @@ function TitleBar(): React.JSX.Element {
             <ArrowLeftIcon />
           </Button>
           <Button
-            onClick={() => navigate(1)}
+            onClick={() => window.history.forward()}
             data-test-id="nav-forward"
             variant="ghost"
             size="sm"
@@ -37,11 +44,11 @@ function TitleBar(): React.JSX.Element {
             <ArrowRightIcon />
           </Button>
         </nav>
-        <h1 className="text-sm font-bold">{formatLocation(location)}</h1>
+        <h1 className="text-sm font-bold">{formatLocation(pathname)}</h1>
       </div>
       <div className="flex flex-row items-center justify-end [-webkit-app-region:no-drag]">
         <Button
-          onClick={() => trpc.window.minimize.mutate().catch((err) => console.log(err))}
+          onClick={() => minimize()}
           variant="ghost"
           size="sm"
           className="text-muted-foreground h-full rounded-none"
@@ -49,18 +56,18 @@ function TitleBar(): React.JSX.Element {
           <MinusIcon />
         </Button>
         <Button
-          onClick={() => trpc.window.maximize.mutate()}
+          onClick={() => maximize()}
           variant="ghost"
           size="sm"
           className="text-muted-foreground h-full rounded-none"
         >
-          <SquareIcon className="!size-[11px]" />
+          <SquareIcon className="size-2.75!" />
         </Button>
         <Button
-          onClick={() => trpc.window.close.mutate()}
+          onClick={() => close()}
           variant="ghost"
           size="sm"
-          className="text-muted-foreground hover:bg-destructive h-full rounded-none rounded-tr hover:text-white"
+          className="text-muted-foreground hover:bg-destructive-foreground h-full rounded-none rounded-tr hover:text-white"
         >
           <XIcon />
         </Button>

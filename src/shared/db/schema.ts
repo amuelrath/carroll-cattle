@@ -1,52 +1,236 @@
+import { type TRecord, ZRecord } from '@shared/schemas/helper.schemas'
+import { type TProcessId, ZProcessId } from '@shared/schemas/jobs'
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { defineRelations } from 'drizzle-orm/relations'
-import { int, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { blob, foreignKey, int, primaryKey, sqliteTable, text } from 'drizzle-orm/sqlite-core'
+import { createSelectSchema } from 'drizzle-orm/zod'
+import { z } from 'zod'
+
+export const ZImageOut = z.union([
+  z.string(),
+  z
+    .custom<Uint8Array<ArrayBufferLike>>((v) => v instanceof Uint8Array, 'Expected Uint8Array')
+    .transform((b) => Buffer.from(b.buffer, b.byteOffset, b.byteLength).toString('base64'))
+])
+
+export const ZJobStatus = z.enum(['active', 'inactive', 'paused', 'complete'])
+export type TJobStatus = z.infer<typeof ZJobStatus>
+
+export const ZTaskStatus = z.enum(['done', 'issue', 'notDone'])
+export type TTaskStatus = z.infer<typeof ZTaskStatus>
 
 export const processes = sqliteTable('processes', {
-  id: int().primaryKey({ autoIncrement: true }),
+  id: text().primaryKey().$type<TProcessId>(),
   name: text().notNull(),
   desc: text().notNull()
 })
 export type TSelectProcess = InferSelectModel<typeof processes>
 export type TInsertProcess = InferInsertModel<typeof processes>
+export const ZSelectProcess = createSelectSchema(processes, {
+  id: ZProcessId
+})
+
+export const files = sqliteTable('files', {
+  id: int().primaryKey({ autoIncrement: true }),
+  fileName: text().notNull(),
+  sheetName: text().notNull(),
+  filePath: text().notNull(), // filePath at time of upload. Could change.
+  columnMap: text({ mode: 'json' }).$type<Record<string, string>>(),
+  uploadedAt: int({ mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date())
+})
+export type TSelectFile = InferSelectModel<typeof files>
+export type TInsertFile = InferInsertModel<typeof files>
+export const ZSelectFile = createSelectSchema(files, {
+  columnMap: z.record(z.string(), z.string()).nullable()
+})
+
+export const fileRows = sqliteTable(
+  'fileRows',
+  {
+    fileId: int()
+      .notNull()
+      .references(() => files.id, { onDelete: 'cascade' }),
+    rowIdx: int().notNull(),
+    originalRow: text({ mode: 'json' }).$type<TRecord>().notNull(),
+    copyRow: text({ mode: 'json' }).$type<TRecord>().notNull()
+  },
+  (t) => [primaryKey({ columns: [t.fileId, t.rowIdx] })]
+)
+export type TSelectFileRow = InferSelectModel<typeof fileRows>
+export type TInsertFileRow = InferInsertModel<typeof fileRows>
+export const ZSelectFileRow = createSelectSchema(fileRows, {
+  originalRow: ZRecord,
+  copyRow: ZRecord
+})
 
 export const jobs = sqliteTable('jobs', {
   id: int().primaryKey({ autoIncrement: true }),
-  processId: int()
+  title: text().notNull(),
+  status: text().$type<TJobStatus>().notNull().default('inactive'),
+  processId: text()
     .notNull()
-    .references(() => processes.id),
-  startedAt: int({ mode: 'timestamp_ms' })
+    .references(() => processes.id)
+    .$type<TProcessId>(),
+  fileId: int()
+    .notNull()
+    .references(() => files.id, { onDelete: 'cascade' }),
+  createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date()),
+  startedAt: int({ mode: 'timestamp_ms' }),
   completedAt: int({ mode: 'timestamp_ms' })
 })
 export type TSelectJob = InferSelectModel<typeof jobs>
 export type TInsertJob = InferInsertModel<typeof jobs>
-
-export const actions = sqliteTable('actions', {
-  id: int().primaryKey({ autoIncrement: true }),
-  jobId: int()
-    .notNull()
-    .references(() => jobs.id),
-  startedAt: int({ mode: 'timestamp_ms' })
-    .notNull()
-    .$defaultFn(() => new Date()),
-  completedAt: int({ mode: 'timestamp_ms' })
+export const ZSelectJob = createSelectSchema(jobs, {
+  processId: ZProcessId,
+  status: ZJobStatus
 })
-export type TSelectAction = InferSelectModel<typeof actions>
-export type TInsertAction = InferInsertModel<typeof actions>
 
-export const relations = defineRelations({ processes, jobs, actions }, (r) => ({
-  jobs: {
-    process: r.one.processes({
-      from: r.jobs.processId,
-      to: r.processes.id
-    })
+export const tasks = sqliteTable(
+  'tasks',
+  {
+    id: int().primaryKey({ autoIncrement: true }),
+    jobId: int()
+      .notNull()
+      .references(() => jobs.id, { onDelete: 'cascade' }),
+    fileId: int()
+      .notNull()
+      .references(() => files.id, { onDelete: 'cascade' }),
+    rowIdx: int().notNull(),
+    createdAt: int({ mode: 'timestamp_ms' })
+      .notNull()
+      .$defaultFn(() => new Date()),
+    status: text().$type<TTaskStatus>().notNull().default('notDone'),
+    startedAt: int({ mode: 'timestamp_ms' }),
+    completedAt: int({ mode: 'timestamp_ms' })
   },
-  actions: {
-    job: r.one.jobs({
-      from: r.actions.jobId,
-      to: r.jobs.id
+  (t) => [
+    // fileId intentionally denormalized so we can derive FK
+    foreignKey({
+      columns: [t.fileId, t.rowIdx],
+      foreignColumns: [fileRows.fileId, fileRows.rowIdx]
     })
-  }
-}))
+  ]
+)
+export type TSelectTask = InferSelectModel<typeof tasks>
+export type TInsertTask = InferInsertModel<typeof tasks>
+export const ZSelectTask = createSelectSchema(tasks, {
+  status: ZTaskStatus
+})
+
+export const taskProofs = sqliteTable('taskProofs', {
+  taskId: int()
+    .primaryKey()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  image: blob({ mode: 'buffer' }).notNull(),
+  url: text().notNull(),
+  createdAt: int({ mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date())
+})
+export type TSelectTaskProof = InferSelectModel<typeof taskProofs>
+export type TInsertTaskProof = InferInsertModel<typeof taskProofs>
+export const ZSelectTaskProof = createSelectSchema(taskProofs, {
+  image: ZImageOut
+})
+
+export const taskIssues = sqliteTable('taskIssues', {
+  taskId: int()
+    .primaryKey()
+    .references(() => tasks.id, { onDelete: 'cascade' }),
+  rowSnapshot: text({ mode: 'json' }).$type<TRecord>().notNull(),
+  image: blob({ mode: 'buffer' }).notNull(),
+  url: text().notNull(),
+  hint: text().notNull(),
+  createdAt: int({ mode: 'timestamp_ms' })
+    .notNull()
+    .$defaultFn(() => new Date())
+})
+export type TSelectTaskIssue = InferSelectModel<typeof taskIssues>
+export type TInsertTaskIssue = InferInsertModel<typeof taskIssues>
+export const ZSelectTaskIssue = createSelectSchema(taskIssues, {
+  rowSnapshot: ZRecord,
+  image: ZImageOut
+})
+
+export const relations = defineRelations(
+  {
+    processes,
+    jobs,
+    files,
+    fileRows,
+    tasks,
+    taskIssues,
+    taskProofs
+  },
+  (r) => ({
+    jobs: {
+      process: r.one.processes({
+        from: r.jobs.processId,
+        to: r.processes.id,
+        optional: false
+      }),
+      file: r.one.files({
+        from: r.jobs.fileId,
+        to: r.files.id,
+        optional: false
+      }),
+      tasks: r.many.tasks({
+        from: r.jobs.id,
+        to: r.tasks.jobId
+      })
+    },
+    files: {
+      rows: r.many.fileRows({
+        from: r.files.id,
+        to: r.fileRows.fileId
+      }),
+      jobs: r.many.jobs({
+        from: r.files.id,
+        to: r.jobs.fileId
+      })
+    },
+    fileRows: {
+      file: r.one.files({
+        from: r.fileRows.fileId,
+        to: r.files.id,
+        optional: false
+      })
+    },
+    tasks: {
+      row: r.one.fileRows({
+        from: [r.tasks.fileId, r.tasks.rowIdx],
+        to: [r.fileRows.fileId, r.fileRows.rowIdx],
+        optional: false
+      }),
+      job: r.one.jobs({
+        from: r.tasks.jobId,
+        to: r.jobs.id,
+        optional: false
+      }),
+      proof: r.one.taskProofs({
+        from: r.tasks.id,
+        to: r.taskProofs.taskId
+      }),
+      issue: r.one.taskIssues({
+        from: r.tasks.id,
+        to: r.taskIssues.taskId
+      })
+    },
+    taskProofs: {
+      task: r.one.tasks({
+        from: r.taskProofs.taskId,
+        to: r.tasks.id
+      })
+    },
+    taskIssues: {
+      task: r.one.tasks({
+        from: r.taskIssues.taskId,
+        to: r.tasks.id
+      })
+    }
+  })
+)

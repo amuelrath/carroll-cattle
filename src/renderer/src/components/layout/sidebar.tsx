@@ -1,32 +1,39 @@
+import { cn } from '@renderer/lib/utils'
+import { useMatchRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { motion } from 'framer-motion'
 import React from 'react'
 import { Button } from '../ui/button'
-import { HistoryIcon, HomeIcon, SettingsIcon, BotIcon } from 'lucide-react'
-import { useLocation, useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { cn } from '@renderer/lib/utils'
-import { ROUTES } from '@shared/routes'
 
-const navItems = [
-  { path: ROUTES.home, icon: HomeIcon },
-  { path: ROUTES.process.home, icon: BotIcon },
-  { path: ROUTES.history, icon: HistoryIcon },
-  { path: ROUTES.settings, icon: SettingsIcon }
-]
+export function SideBar(): React.JSX.Element {
+  const router = useRouter()
+  const matchRoute = useMatchRoute()
 
-function SideBar(): React.JSX.Element {
+  const navItems = Object.values(router.routesById)
+    .filter((route) => route.parentRoute?.id === router.routeTree.id)
+    .filter((route) => route.options.staticData?.icon)
+    .map((route) => ({
+      path: route.fullPath,
+      icon: route.options.staticData!.icon,
+      order: route.options.staticData!.navOrder ?? Number.MAX_SAFE_INTEGER
+    }))
+    .sort((a, b) => a.order - b.order)
+
   const navigate = useNavigate()
-  const location = useLocation()
+
+  const handleClick = async (path: string) => {
+    await navigate({ to: path })
+  }
 
   return (
     <aside className="flex w-10 flex-col items-center bg-transparent">
       <div className="flex flex-1 flex-col items-center justify-start gap-1 pt-2">
         {navItems.map(({ path, icon: Icon }) => {
-          const isActive = location.pathname === path
+          const isActive = !!matchRoute({ to: path, fuzzy: true })
 
           return (
             <Button
               key={path}
-              onClick={() => navigate(path)}
+              onClick={() => handleClick(path)}
               size="sm"
               variant="ghost"
               className="relative"
@@ -46,5 +53,3 @@ function SideBar(): React.JSX.Element {
     </aside>
   )
 }
-
-export { SideBar }

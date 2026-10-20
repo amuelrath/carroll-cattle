@@ -1,36 +1,26 @@
 import type { AppRouter } from '@main/trpc'
+import { toast } from '@renderer/components/ui/toast'
 import { errors } from '@shared/resources/strings'
-import { createTRPCProxyClient, TRPCLink } from '@trpc/client'
+import { TRPCLink } from '@trpc/client'
+import { createTRPCReact } from '@trpc/react-query'
 import { observable } from '@trpc/server/observable'
-import log from 'electron-log/renderer'
+import superjson from 'superjson'
 import { ipcLink } from 'trpc-electron/renderer'
-import { toast } from '../components/ui/toast'
-import { navigate } from './nav-ref'
 
-const responseLink: TRPCLink<AppRouter> = () => {
+const toastLink: TRPCLink<AppRouter> = () => {
   return ({ next, op }) => {
     return observable((observer) => {
       return next(op).subscribe({
         next(value) {
-          // eslint-disable-next-line
-          const res = value.result.data as any
-          if (res?.redirect) navigate(res.redirect)
-          if (res?.toast) {
-            toast.add({
-              type: res.toast.type,
-              description: res.toast.message
-            })
-          }
           observer.next(value)
         },
         error(err) {
           toast.add({
             type: err.data?.toast?.type ?? 'error',
-            description: err.data?.toast?.message ?? errors.unknown
+            title: err.data?.toast?.title ?? 'Unexpected Error',
+            description: err.data?.toast?.description ?? errors.unknown
           })
-          if (err.data?.toast) {
-            log.error(err.message, err.data?.causeMessage ?? err.cause)
-          }
+
           observer.error(err)
         },
         complete() {
@@ -41,6 +31,9 @@ const responseLink: TRPCLink<AppRouter> = () => {
   }
 }
 
-export const trpc = createTRPCProxyClient<AppRouter>({
-  links: [responseLink, ipcLink()]
+const links: TRPCLink<AppRouter>[] = [toastLink, ipcLink({ transformer: superjson })]
+
+export const trpc = createTRPCReact<AppRouter>()
+export const trpcClient = trpc.createClient({
+  links
 })

@@ -1,34 +1,35 @@
-import { router, procedure } from '../trpc'
-import { z } from 'zod'
-import { ZProcess } from '@shared/schemas/process'
-import * as XLSX from 'xlsx'
-import type { TSheetImportSheetResponse } from '@shared/schemas/response'
+import { sheetService } from '@main/services'
+import { procedure, router } from '@main/trpc/trpc'
+import { unwrap } from '@main/trpc/unwrap'
+import {
+  type TFetchSheetResponse,
+  type TSheet,
+  type TSheetPreviewResponse,
+  ZFetchSheetInput,
+  ZFetchSheetResponse,
+  ZGetSheetInput,
+  ZPreviewSheetInput,
+  ZSheet,
+  ZSheetPreviewResponse
+} from '@shared/schemas/trpc'
 
 export const sheetRouter = router({
-  importSheet: procedure
-    .input(z.object({ process: ZProcess, filePath: z.string() }))
-    .query(async ({ input }): Promise<TSheetImportSheetResponse> => {
-      const sheet = XLSX.readFile(input.filePath)
+  previewSheets: procedure
+    .input(ZPreviewSheetInput)
+    .mutation(async ({ input }): Promise<TSheetPreviewResponse> => {
+      const sheets = await unwrap(sheetService.previewSheetsFromDisk(input))
+      return ZSheetPreviewResponse.parse({ sheets })
+    }),
 
-      if (sheet.SheetNames.length > 1) {
-        // only one sheet: user must select which sheet to use
-        // before the redirect
-        return {
-          status: 'success',
-          data: {
-            sheetNames: [...sheet.SheetNames]
-          }
-        }
-      }
+  fetchSheet: procedure
+    .input(ZFetchSheetInput)
+    .query(async ({ input }): Promise<TFetchSheetResponse> => {
+      const rows = await unwrap(sheetService.fetchSheetFromDisk(input))
+      return ZFetchSheetResponse.parse({ rows })
+    }),
 
-      // create new job in db, link file path
-
-      return {
-        status: 'success',
-        data: {
-          sheetNames: [...sheet.SheetNames]
-        },
-        redirect: `/process/${input.process}`
-      }
-    })
+  getSheet: procedure.input(ZGetSheetInput).query(async ({ input }): Promise<TSheet> => {
+    const view = await unwrap(sheetService.getSheet(input))
+    return ZSheet.parse(view)
+  })
 })

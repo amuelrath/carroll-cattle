@@ -1,24 +1,26 @@
+import 'source-map-support/register'
+import { electronApp, optimizer } from '@electron-toolkit/utils'
+import { getDb } from '@main/db'
+import { runMigrations } from '@main/lib/migrations'
 import { app, BrowserWindow } from 'electron'
 import log from 'electron-log/main'
-import { electronApp, optimizer } from '@electron-toolkit/utils'
-import { createMainWindow } from './core/main-window'
-import { createContext } from './trpc/context'
-import { appRouter } from './trpc'
 import { createIPCHandler } from 'trpc-electron/main'
+import { createMainWindow } from './core/main-window'
 import { seedIfEmpty } from './db/seed-if-empty'
-import { runMigrations } from './db'
+import { appRouter } from './trpc'
+import { createContext } from './trpc/context'
 
 log.initialize()
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(async () => {
+app.whenReady().then(;async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
   // Initialize DB and seed.
-  await runMigrations()
+  await runMigrations(getDb())
   await seedIfEmpty()
 
   console.log(app.getPath('userData'))
@@ -31,6 +33,9 @@ app.whenReady().then(async () => {
   })
 
   const mainWindow = createMainWindow()
+
+  // Open the Devtools in a sep window
+  mainWindow.webContents.openDevTools({ mode: 'detach' })
 
   // Register tRPC router
   createIPCHandler({ createContext, router: appRouter, windows: [mainWindow] })

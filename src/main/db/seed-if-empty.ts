@@ -1,18 +1,14 @@
 import { processes } from '@shared/db/schema'
-import { processesCopy } from '@shared/resources/strings/processes'
 import log from 'electron-log/main'
-import { db } from './index'
+import { getDb } from './'
+import { processSeed } from './_data'
 
+// ToDo seed data should live near here
 export async function seedIfEmpty() {
   try {
-    const existing = await db.select().from(processes).limit(1)
+    const existing = await getDb().select().from(processes).limit(1)
     if (existing.length === 0) {
-      await db.insert(processes).values([
-        ...Object.entries(processesCopy).map(([, { name, desc }]) => ({
-          name,
-          desc
-        }))
-      ])
+      await getDb().insert(processes).values(processSeed)
       log.info('Seeding complete.')
     } else {
       log.info('DB already seeded. Skipping...')

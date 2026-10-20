@@ -1,34 +1,26 @@
 import 'dotenv/config'
 import { relations } from '@shared/db/schema'
 import { drizzle } from 'drizzle-orm/libsql'
-import { migrate } from 'drizzle-orm/libsql/migrator'
 import { app } from 'electron'
-import log from 'electron-log/main'
 import path from 'node:path'
 
-const DEV_DB = 'dev.db'
-const PROD_DB = 'prod.db'
+let _db: DrizzleDb | undefined
 
-const dbPath = path.join(app.getPath('userData'), process.env.DEV_MODE! ? DEV_DB : PROD_DB)
-
-export const db = drizzle(`file:${dbPath}`, { relations })
-
-export function resolveMigrationsPath(isPackaged: boolean, appPath: string, resourcesPath: string) {
-  return isPackaged ? path.join(resourcesPath, 'drizzle') : path.join(appPath, 'drizzle')
-}
-
-export async function runMigrations() {
-  try {
-    const migrationsFolder = resolveMigrationsPath(
-      app.isPackaged,
-      app.getAppPath(),
-      process.resourcesPath
-    )
-    log.info('Running migrations from', migrationsFolder)
-    await migrate(db, { migrationsFolder })
-    log.info('Migrations complete')
-  } catch (err) {
-    log.error('Migration failed:', err)
-    throw err
+export function getDb() {
+  if (!_db) {
+    const dbFileName = app.isPackaged ? 'prod.db' : 'dev.db'
+    const dbPath = `file:${path.join(app.getPath('userData'), dbFileName)}`
+    _db = drizzle(dbPath, { relations })
   }
+  return _db
 }
+
+export function __setDbForTesting(testDb: DrizzleDb) {
+  _db = testDb
+}
+
+export type DrizzleDb = ReturnType<typeof drizzle<typeof relations>>
+
+export type Tx = Parameters<Parameters<DrizzleDb['transaction']>[0]>[0]
+
+export type Executor = DrizzleDb | Tx

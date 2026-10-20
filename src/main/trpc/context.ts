@@ -5,7 +5,8 @@ export async function createContext({ event }: CreateContextOptions) {
   return {
     window: BrowserWindow.fromWebContents(event.sender),
     dialog: dialog,
-    webUtils: webUtils
+    webUtils: webUtils,
+    sender: event.sender
   }
 }
 
