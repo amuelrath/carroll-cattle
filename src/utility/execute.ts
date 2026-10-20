@@ -12,6 +12,8 @@ import { postMainMessage } from '@utility/ipc'
 import { resolveTarget } from '@utility/resolve'
 import { type Locator, type Page } from 'playwright'
 
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
 type Ctx = {
   page: Page
   // signal: AbortSignal
@@ -28,7 +30,9 @@ function createCtx(page: Page): Ctx {
     },
     // ensure that the element exists before doing anything
     ensure: async (selectors) => {
+      // await page.hideHighlight()
       const loc = resolveTarget(page, selectors)
+      // await loc.highlight()
       await loc.waitFor({ state: 'visible' }) // WatchMe Could be useful to add an abort signal.
       await loc.scrollIntoViewIfNeeded()
       return loc
@@ -93,6 +97,17 @@ const handlers: { [K in TActionType]: Handler<K> } = {
         return Object.fromEntries(headers.map((h, i) => [h, cells[i]]))
       })
     })
+  },
+  clickText: async ({ locate }, action) => {
+    const loc = locate(action.target)
+      .filter({ hasText: new RegExp(`^\\s*${escapeRegExp(action.input)}\\s*$`, 'i') })
+      .first()
+    await loc.waitFor({ state: 'visible' }) // also waits for AJAX results to arrive
+    await loc.scrollIntoViewIfNeeded()
+    await loc.click()
+  },
+  getUrl: async ({ page }) => {
+    return page.url()
   }
 }
 

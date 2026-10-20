@@ -27,6 +27,11 @@ export const actions = {
     target: true,
     output: z.void()
   },
+  clickText: {
+    target: true,
+    input: z.string(),
+    output: z.void()
+  },
   select: {
     target: true,
     input: z.string(),

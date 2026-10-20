@@ -1,11 +1,11 @@
 import type { TInsertProcess } from '@shared/db/schema'
 
 export const processSeed: TInsertProcess[] = [
-  // {
-  //   id: 'breedRecip',
-  //   name: 'Breed Recipients',
-  //   desc: 'Update recipient profiles in CattleMax.'
-  // },
+  {
+    id: 'breeding',
+    name: 'Breed Recipients',
+    desc: 'Update recipient profiles in CattleMax.'
+  },
   // {
   //   id: 'calveRecip',
   //   name: 'Calve Recipients',

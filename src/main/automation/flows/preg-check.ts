@@ -1,94 +1,13 @@
-import { findFirst } from '@main/automation/flows/find-first'
 import {
-  type Authed,
   type BreedingTab,
   type PregCheckModal,
-  type Profile,
   type ScopeConsumer,
-  type ScopeProvider,
-  type SearchResult
+  type ScopeProvider
 } from '@main/automation/site'
-import { act, narr, sel } from '@shared/automation'
+import type { MatchResult } from '@main/automation/types'
+import { act, narr } from '@shared/automation'
 import { RowIssue } from '@shared/automation/errors'
 import type { TFileRow } from '@shared/schemas/jobs'
-import { ZAnimalSearchResultRow } from '@shared/schemas/jobs/site.schemas'
-import { errors } from 'playwright'
-
-function findMatchingTagOrThrow(earTag: string, results: Record<string, unknown>[]) {
-  const rows = results.map((r) => ZAnimalSearchResultRow.parse(r))
-  const activeAnimals = rows.filter((r) => r.Status === 'Active')
-  if (activeAnimals.length === 0)
-    throw new RowIssue('NOT_FOUND', `Search ${earTag} yielded no active animals.`)
-
-  const matches = activeAnimals.filter((a) => {
-    const expectedTag = earTag.trim().toLowerCase()
-    const foundTag = a['Ear Tag'].trim().toLowerCase()
-    return foundTag === expectedTag
-  })
-
-  if (matches.length === 1) return matches[0]['Ear Tag']
-
-  throw new RowIssue('NOT_FOUND', `Search ${earTag} yielded no active animals.`)
-}
-
-const resolveSearchResults = function* (scope, earTag: string) {
-  const { animalsTable } = scope
-
-  const hasResults = yield* act.getIsVisible(animalsTable)
-  if (!hasResults) throw new RowIssue('NOT_FOUND', `Search ${earTag} yielded no active animals.`)
-
-  const raw = yield* act.extractTable(animalsTable)
-  const tagMatch = findMatchingTagOrThrow(earTag, raw)
-
-  const roleSelector = sel.css('a')
-  const tagSelector = sel.text(tagMatch)
-
-  yield* act.click([roleSelector, tagSelector])
-} satisfies ScopeConsumer<SearchResult>
-
-export const openProfile = function* (scope, earTag: string) {
-  yield narr('Searching for animal...')
-
-  const { sidebar, searchResult, profile } = scope
-
-  // search for the animal
-  yield* act.fill(sidebar.searchbar, earTag)
-  yield* act.click(sidebar.submitSearch)
-
-  const found = yield* findFirst({
-    search: searchResult.searchbar,
-    profile: profile.name
-  })
-
-  if (found === 'search') {
-    yield* resolveSearchResults(searchResult, earTag)
-  }
-
-  try {
-    // double check that we are where we expect to be
-    const profileName = yield* act.getText(profile.name)
-    if (profileName !== earTag) {
-      yield* act.waitForText(profile.secondaryName, earTag)
-    }
-  } catch (err) {
-    if (!(err instanceof errors.TimeoutError)) throw err
-    throw new RowIssue(
-      'NOT_FOUND',
-      `Expected profile for "${earTag}", but ended up somewhere else."`
-    )
-  }
-
-  return profile
-} satisfies ScopeProvider<Authed, Profile>
-
-export const openBreedingTab = function* (scope) {
-  const { breedingTab } = scope
-  yield* act.waitForVisible(breedingTab.$enter) // !
-  yield* act.click(breedingTab.$enter)
-  yield* act.waitForVisible(breedingTab.pregCheckForm.$enter)
-
-  return breedingTab
-} satisfies ScopeProvider<Profile, BreedingTab>
 
 export const openMostRecentCheck = function* (scope) {
   const { firstPregCheck } = scope
@@ -121,11 +40,16 @@ export const fillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
   yield* act.click(form.submit)
 } satisfies ScopeConsumer<BreedingTab>
 
-interface MatchResult {
-  valid: boolean
-  screenshot: string
-}
-const checkIfExistingMatches = function* (scope, row: TFileRow<'pregCheck'>) {
+export const checkIfExistingMatches = function* (scope, row: TFileRow<'pregCheck'>) {
+  const exit = function* (valid: boolean) {
+    const screenshot = yield* act.screenshot(modalContent)
+    yield* act.click(cancel)
+    return {
+      valid,
+      screenshot
+    }
+  }
+
   const { modalContent, cancel, ...modalFields } = scope
 
   const fieldsToCheck = (Object.keys(row) as (keyof typeof row)[]).filter(
@@ -159,7 +83,7 @@ const checkIfExistingMatches = function* (scope, row: TFileRow<'pregCheck'>) {
 } satisfies ScopeConsumer<PregCheckModal, MatchResult>
 
 // MaybeToDo: Maybe confirm submission by checking before and after row counts?
-export const checkOrFill = function* (scope, row: TFileRow<'pregCheck'>) {
+export const checkOrFillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
   const { firstPregCheck } = scope
 
   const check = function* () {

@@ -21,11 +21,15 @@ export interface Handlers {
 }
 
 // Authed is out recovery point.
-export interface RowFlow<Row> {
+export interface RowFlow<K extends TProcessId> {
   /** Runs once. Failure here is fatal (e.g. login). */
   setup: () => Flow
   /** Runs per row. Throwing = this row gets an issue, runner moves on. */
-  row: (row: Row, idx: number) => Flow<{ screenshot: string }>
+  row: (row: TFileRow<K>, idx: number) => Flow<{ screenshot: string }>
   /** Runs after a failed row to get the page back to a known state. */
   recover?: () => Flow
+}
+export interface MatchResult {
+  valid: boolean
+  screenshot: string
 }

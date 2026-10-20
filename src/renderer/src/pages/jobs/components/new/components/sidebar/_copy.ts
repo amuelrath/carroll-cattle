@@ -1,6 +1,7 @@
 import type { TProcessId } from '@shared/schemas/jobs'
-import { type LucideIcon, TestTubeIcon } from 'lucide-react'
+import { BabyIcon, type LucideIcon, TestTubeIcon } from 'lucide-react'
 
 export const processIcons = {
-  pregCheck: TestTubeIcon
+  pregCheck: TestTubeIcon,
+  breeding: BabyIcon
 } satisfies Record<TProcessId, LucideIcon>
