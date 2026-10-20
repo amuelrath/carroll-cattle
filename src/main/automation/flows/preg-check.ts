@@ -105,7 +105,7 @@ export const checkOrFillPregCheck = function* (scope, row: TFileRow<'pregCheck'>
   match = yield* check()
   if (match.valid) {
     return match.screenshot
+  } else {
+    throw new RowIssue('REVIEW', 'Checked work did not match what was input.')
   }
-
-  throw new RowIssue('REVIEW', 'Checked work did not match what was input.')
 } satisfies ScopeConsumer<BreedingTab, string>
