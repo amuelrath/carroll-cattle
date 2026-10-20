@@ -127,19 +127,30 @@ interface CustomDialogHeaderProps {
   icon: LucideIcon
   title: string
   description: string
+  children?: React.ReactNode
+  className?: string
 }
 
-function CustomDialogHeader({ icon, title, description }: CustomDialogHeaderProps) {
+function CustomDialogHeader({
+  icon,
+  title,
+  description,
+  children,
+  className
+}: CustomDialogHeaderProps) {
   return (
-    <DialogHeader className="-mx-8 border-b px-8 pb-6">
-      <div className="flex flex-row items-center gap-2">
-        <IconCircle Icon={icon} size="large" />
-        <div className="space-y-1">
-          <DialogTitle className="flex flex-row items-center space-x-2">
-            <span className="text-md">{title}</span>
-          </DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
+    <DialogHeader className={cn('-mx-8 border-b px-8 pb-6', className)}>
+      <div className="flex flex-row items-center justify-between">
+        <div className="flex flex-row items-center gap-2">
+          <IconCircle Icon={icon} size="large" />
+          <div className="space-y-1">
+            <DialogTitle className="flex flex-row items-center space-x-2">
+              <span className="text-md">{title}</span>
+            </DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
+          </div>
         </div>
+        {children}
       </div>
     </DialogHeader>
   )
