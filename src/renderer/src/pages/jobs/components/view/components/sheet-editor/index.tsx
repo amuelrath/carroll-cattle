@@ -122,17 +122,7 @@ function SheetTable({ sheet, onCellUpdate }: SheetTableProps) {
 
   return (
     <div className="@container flex min-h-0 min-w-0 flex-1 grow flex-row">
-      <div
-        className={cn(
-          'relative min-h-0 min-w-0 flex-1 overflow-x-auto',
-          '[&::-webkit-scrollbar]:w-1.5',
-          '[&::-webkit-scrollbar]:h-1.5',
-          '[&::-webkit-scrollbar-button]:hidden',
-          '[&::-webkit-scrollbar-thumb]:rounded-none',
-          '[&::-webkit-scrollbar-thumb]:bg-okay-foreground/80',
-          '[&::-webkit-scrollbar-track]:bg-okay/50'
-        )}
-      >
+      <div className="scrollbar-custom relative min-h-0 min-w-0 flex-1 overflow-x-auto">
         <table className="relative w-max min-w-[100cqw] caption-bottom border-separate border-spacing-0 text-sm [&_td]:border-b [&_th]:border-b">
           <SheetTableHeader columns={columns} />
           <TableBody>

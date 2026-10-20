@@ -8,6 +8,24 @@
 @custom-variant inactive (&[data-state="inactive"]);
 @custom-variant disabled (&[data-disabled]);
 
+@utility scrollbar-custom {
+    &::-webkit-scrollbar {
+        @apply w-1.5 h-1.5;
+    }
+
+    &::-webkit-scrollbar-button {
+        @apply hidden;
+    }
+
+    &::-webkit-scrollbar-thumb {
+        @apply rounded-none bg-okay-foreground/80;
+    }
+
+    &::-webkit-scrollbar-track {
+        @apply bg-okay/50;
+    }
+}
+
 @theme inline {
     --color-background: var(--background);
     --color-foreground: var(--foreground);
