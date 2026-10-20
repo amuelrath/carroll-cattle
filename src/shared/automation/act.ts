@@ -56,6 +56,10 @@ export const actions = {
   getIsVisible: {
     target: true,
     output: z.boolean()
+  },
+  getUrl: {
+    target: false,
+    output: z.string()
   }
 } as const satisfies Record<string, ActionDef>
 

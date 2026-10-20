@@ -27,8 +27,8 @@ export class TaskService {
     )
   }
 
-  commitTask(input: { taskId: TSelectTask['id']; screenshot: string }) {
-    const { taskId, screenshot } = input
+  commitTask(input: { taskId: TSelectTask['id']; screenshot: string; url: string }) {
+    const { taskId, screenshot, url } = input
     return fromDb<void, DatabaseError | NotFoundError | NotAllowedError>(
       this.db.transaction(async (tx) => {
         const task = await tasksRepo.readOne(tx, taskId)
@@ -42,7 +42,7 @@ export class TaskService {
 
         // now add the proof
         const image = base64ToBuffer(screenshot)
-        await taskProofsRepo.insert(tx, { taskId, image })
+        await taskProofsRepo.insert(tx, { taskId, image, url })
 
         // delete any issues
         await taskIssuesRepo.delete(tx, taskId)
@@ -58,8 +58,8 @@ export class TaskService {
     )
   }
 
-  upsertIssue(input: { taskId: TSelectTask['id']; screenshot: string; hint: string }) {
-    const { taskId, hint, screenshot } = input
+  upsertIssue(input: { taskId: TSelectTask['id']; screenshot: string; hint: string; url: string }) {
+    const { taskId, hint, screenshot, url } = input
     return fromDb(
       this.db.transaction(async (tx) => {
         const task = await tasksRepo.readOne(tx, taskId)
@@ -73,7 +73,8 @@ export class TaskService {
           taskId,
           image,
           hint,
-          rowSnapshot
+          rowSnapshot,
+          url
         })
       })
     )

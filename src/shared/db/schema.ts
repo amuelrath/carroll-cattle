@@ -126,6 +126,7 @@ export const taskProofs = sqliteTable('taskProofs', {
     .primaryKey()
     .references(() => tasks.id, { onDelete: 'cascade' }),
   image: blob({ mode: 'buffer' }).notNull(),
+  url: text().notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
     .notNull()
     .$defaultFn(() => new Date())
@@ -142,6 +143,7 @@ export const taskIssues = sqliteTable('taskIssues', {
     .references(() => tasks.id, { onDelete: 'cascade' }),
   rowSnapshot: text({ mode: 'json' }).$type<TRecord>().notNull(),
   image: blob({ mode: 'buffer' }).notNull(),
+  url: text().notNull(),
   hint: text().notNull(),
   createdAt: int({ mode: 'timestamp_ms' })
     .notNull()

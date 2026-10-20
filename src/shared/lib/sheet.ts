@@ -120,7 +120,7 @@ export function getSheetRow(
     return {
       ...base,
       state: 'done',
-      proof: { completedAt: proof.createdAt, screenshot: proof.image }
+      proof: { completedAt: proof.createdAt, screenshot: proof.image, url: proof.url }
     }
   }
 
@@ -136,7 +136,8 @@ export function getSheetRow(
       issue: {
         editsSince,
         screenshot: issue.image,
-        hint: issue.hint
+        hint: issue.hint,
+        url: issue.url
       }
     }
   }

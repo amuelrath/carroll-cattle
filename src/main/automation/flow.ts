@@ -57,7 +57,11 @@ export async function runFlow<K extends TProcessId>(
     try {
       await h.onStart(index)
       const { screenshot } = await drive(flow.row(row, index), h)
-      await h.onCommit(index, screenshot)
+      const url = await h.request({
+        type: 'getUrl',
+        input: undefined
+      })
+      await h.onCommit(index, screenshot, url)
     } catch (e) {
       // We aborted, let AutomationService deal with it
       if (e instanceof AbortedError) throw e
@@ -65,12 +69,16 @@ export async function runFlow<K extends TProcessId>(
       // Don't throw. Just make note and skip to next
       if (e instanceof RowIssue) {
         console.error('ENCOUNTERED ISSUE', String(e))
+        const url = await h.request({
+          type: 'getUrl',
+          input: undefined
+        })
         const screenshot = await h.request({
           type: 'screenshot',
           target: e.target ?? [sel.css('body')],
           input: undefined
         })
-        await h.onIssue(index, e, screenshot)
+        await h.onIssue(index, e, screenshot, url)
       } else {
         // ToDo: A flow can still throw. This is more of a dev-time Band-Aid.
         if (e instanceof Error) throw e

@@ -13,9 +13,9 @@ export interface Handlers {
   /* fires when new row is about to be processed */
   onStart: (idx: number) => Promise<void>
   /* screenshot is base64 png */
-  onCommit: (idx: number, screenshot: string) => Promise<void>
+  onCommit: (idx: number, screenshot: string, url: string) => Promise<void>
   /* screenshot is base64 png */
-  onIssue: (idx: number, issue: RowIssue, screenshot: string) => Promise<void>
+  onIssue: (idx: number, issue: RowIssue, screenshot: string, url: string) => Promise<void>
   onWarn: (warning: string) => Promise<void>
   signal: AbortSignal
 }

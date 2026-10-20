@@ -92,14 +92,17 @@ const ZRowBase = z.object({
 const ZRowIssue = z.object({
   editsSince: z.array(ZCellEdit),
   screenshot: ZImageOut,
-  hint: z.string()
+  hint: z.string(),
+  url: z.url()
 })
 export type TRowIssue = z.infer<typeof ZRowIssue>
 
 const ZRowProof = z.object({
   completedAt: z.date(),
-  screenshot: ZImageOut
+  screenshot: ZImageOut,
+  url: z.url()
 })
+export type TRowProof = z.infer<typeof ZRowProof>
 
 export const ZSheetRow = z.discriminatedUnion('state', [
   ZRowBase.extend({ state: z.literal('ready') }),

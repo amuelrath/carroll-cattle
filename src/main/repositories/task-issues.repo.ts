@@ -12,7 +12,7 @@ export const taskIssuesRepo = {
       .values(input)
       .onConflictDoUpdate({
         target: taskIssues.taskId,
-        set: { hint: input.hint, image: input.image }
+        set: { hint: input.hint, image: input.image, url: input.url }
       })
   }
 }
