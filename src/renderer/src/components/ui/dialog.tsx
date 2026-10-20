@@ -38,7 +38,7 @@ function DialogOverlay({ className, ...props }: DialogPrimitive.Backdrop.Props) 
 function DialogContent({
   className,
   children,
-  showCloseButton = true,
+  showCloseButton = false,
   ...props
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
@@ -87,7 +87,7 @@ function DialogFooter({
     <div
       data-slot="dialog-footer"
       className={cn(
-        'bg-muted/50 -mx-8 -mb-8 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 sm:flex-row sm:justify-end',
+        '-mx-8 -mb-8 flex flex-col-reverse gap-2 rounded-b-xl border-t p-4 sm:flex-row sm:justify-end',
         className
       )}
       {...props}
