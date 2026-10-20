@@ -149,6 +149,10 @@ export function parseAction(raw: unknown): AnyAction {
     throw new Error(`${parsed.type}: target ${def.target ? 'required' : 'not allowed'}`)
   }
 
+  if (!def.input && parsed.input !== undefined) {
+    throw new Error(`${parsed.type}: input not allowed`)
+  }
+
   return {
     type: parsed.type,
     target: parsed.target?.map(parseSelector),

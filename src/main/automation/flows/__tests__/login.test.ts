@@ -1,7 +1,7 @@
 import { login } from '@main/automation/flows/login'
 import { describe, expect, it } from 'vitest'
 import { site } from '../../site'
-import { fakeFlow, respond } from './fake-flow'
+import { fakeFlow, respond } from '../fake-flow'
 
 describe('login', () => {
   it('acts in the correct order', () => {

@@ -17,3 +17,5 @@ export const ZAnimalSearchResultRow = z.object({
   ),
   Status: z.enum(['Active', 'Sold', 'Dead', 'Reference'])
 })
+
+export type TAnimalSearchResultRow = z.infer<typeof ZAnimalSearchResultRow>

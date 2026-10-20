@@ -3,9 +3,7 @@ import { sel } from '@shared/automation'
 import type { TSelector } from '@shared/automation/sel'
 
 const ENTERABLE_SCOPE = '$enter' as const
-
 type TerminalNode = { [key: string]: TSelector }
-
 export type ScopeNode =
   | TerminalNode
   | {

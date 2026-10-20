@@ -45,6 +45,7 @@ export class AutomationService extends WorkerService {
     private jobs: JobService
   ) {
     super()
+    this.setMaxListeners(15)
   }
 
   pause() {

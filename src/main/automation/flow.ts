@@ -46,7 +46,7 @@ async function drive<T>(gen: Flow<T>, h: Handlers): Promise<T> {
 }
 
 export async function runFlow<K extends TProcessId>(
-  processId: TProcessId,
+  processId: K,
   rows: TFileRow<K>[],
   h: Handlers
 ) {

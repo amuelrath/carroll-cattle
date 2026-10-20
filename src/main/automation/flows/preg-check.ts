@@ -90,13 +90,13 @@ export const openBreedingTab = function* (scope) {
   return breedingTab
 } satisfies ScopeProvider<Profile, BreedingTab>
 
-const openMostRecentCheck = function* (scope) {
+export const openMostRecentCheck = function* (scope) {
   const { firstPregCheck } = scope
   yield* act.click(firstPregCheck.$enter)
   return firstPregCheck.modal
 } satisfies ScopeProvider<BreedingTab, PregCheckModal>
 
-const fillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
+export const fillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
   yield narr('Entering data...')
   console.log('ENTERING DATA', row)
 
@@ -108,9 +108,14 @@ const fillPregCheck = function* (scope, row: TFileRow<'pregCheck'>) {
   yield* act.select(form.technician, row.technician)
   yield* act.select(form.result, row.result)
 
-  if (row.method !== 'Observation' && row.timePreg)
+  if (row.method !== 'Observation' && row.timePreg) {
     yield* act.fill(form.timePregnant, String(row.timePreg))
-  if (row.method === 'Ultrasound' && row.sex) yield* act.select(form.ultrasoundSex, row.sex)
+  }
+
+  if (row.method === 'Ultrasound' && row.sex) {
+    yield* act.select(form.ultrasoundSex, row.sex)
+  }
+
   if (row.comments) yield* act.fill(form.comments, row.comments)
 
   yield* act.click(form.submit)
@@ -131,21 +136,13 @@ const checkIfExistingMatches = function* (scope, row: TFileRow<'pregCheck'>) {
   yield* act.waitForVisible(cancel)
 
   for (const field of fieldsToCheck) {
-    console.info(`[${row.recipTag}]: Checking ${field}`)
     const fieldPresent = yield* act.getIsVisible(modalFields[field])
     if (!fieldPresent) {
-      console.info(`[${row.recipTag}]: ${field} Not present`)
-      const screenshot = yield* act.screenshot(modalContent)
-      yield* act.click(cancel)
-      return {
-        valid: false,
-        screenshot
-      }
+      return yield* exit(false)
     }
 
     const expected = String(row[field])
     let found = yield* act.getText(modalFields[field])
-    console.info(`[${row.recipTag}]: Found ${found}, expected ${expected}`)
 
     if (field === 'timePreg') {
       // one-off case where the app convert between
@@ -155,20 +152,10 @@ const checkIfExistingMatches = function* (scope, row: TFileRow<'pregCheck'>) {
     }
 
     if (found !== expected) {
-      const screenshot = yield* act.screenshot(modalContent)
-      yield* act.click(cancel)
-      return {
-        valid: false,
-        screenshot
-      }
+      return yield* exit(false)
     }
   }
-  const screenshot = yield* act.screenshot(modalContent)
-  yield* act.click(cancel)
-  return {
-    valid: true,
-    screenshot
-  }
+  return yield* exit(true)
 } satisfies ScopeConsumer<PregCheckModal, MatchResult>
 
 // MaybeToDo: Maybe confirm submission by checking before and after row counts?
