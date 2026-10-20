@@ -45,7 +45,13 @@ type TSheetPickerForm = z.infer<typeof ZSheetPickerForm>
 
 export function SheetPicker({ sheets, filePath, cancel }: SheetPickerProps): React.JSX.Element {
   const { processId } = useSearch({ from: '/jobs/new/' })
-  const { mutateAsync: mutateCreateJob } = trpc.job.create.useMutation()
+  const utils = trpc.useUtils()
+  const { mutateAsync: mutateCreateJob } = trpc.job.create.useMutation({
+    onSuccess: async () => {
+      await utils.job.readRecentJobs.refetch()
+      await utils.job.readAllJobs.refetch()
+    }
+  })
   const navigate = useNavigate()
 
   const {

@@ -23,7 +23,8 @@ export function ViewPage(): React.JSX.Element {
   const changeTab = async (mainTab: 'automation' | 'sheet') => {
     await navigate({
       from: '/jobs/view/',
-      search: (p) => ({ ...p, mainTab })
+      search: (p) => ({ ...p, mainTab }),
+      replace: true
     })
     setTab(mainTab)
   }

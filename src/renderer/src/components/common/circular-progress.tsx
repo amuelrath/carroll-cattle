@@ -1,5 +1,8 @@
 import { cn } from '@renderer/lib/utils'
+import type { TJobStatus } from '@shared/db/schema'
 import { cva, type VariantProps } from 'class-variance-authority'
+import { Check, Pause, Play, Square } from 'lucide'
+import { MorphIcon } from 'morphicons/react'
 import * as React from 'react'
 
 const VIEWBOX = 100
@@ -107,6 +110,55 @@ export function CircularProgress({
       {children && (
         <div className="absolute inset-0 flex items-center justify-center">{children}</div>
       )}
+    </div>
+  )
+}
+
+const statusIconStyles = {
+  active: 'fill-okay-foreground animate-pulse stroke-okay-foreground size-3.75',
+  inactive: 'fill-muted-foreground stroke-muted-foreground size-3.75',
+  paused: 'fill-muted-foreground animate-pulse stroke-muted-foreground size-3.75',
+  complete: 'stroke-okay-foreground size-3.75 stroke-3'
+}
+
+const statusVariant = {
+  active: 'okay',
+  inactive: 'muted',
+  paused: 'muted',
+  complete: 'okay'
+} as const
+
+interface CircularProgressWithIndicatorProps {
+  value: number
+  status: TJobStatus
+}
+
+export function CircularProgressWithIndicator({
+  value,
+  status
+}: CircularProgressWithIndicatorProps) {
+  const safeValue = Number.isFinite(value) ? Math.min(Math.max(value, 0), 100) : 0
+  const isComplete = safeValue >= 100
+
+  const icon =
+    isComplete ? Check
+    : status === 'active' ? Play
+    : status === 'paused' ? Pause
+    : Square
+  const variant = isComplete ? 'okay' : statusVariant[status === 'complete' ? 'active' : status]
+  const styles = isComplete ? statusIconStyles['complete'] : statusIconStyles[status]
+
+  return (
+    <div className="relative flex flex-col items-center justify-center">
+      <CircularProgress
+        value={value}
+        variant={isComplete ? 'okay' : variant}
+        size="lg"
+        strokeWidth={12}
+      />
+      <span className="absolute top-1/3">
+        <MorphIcon icon={isComplete ? Check : icon} className={styles} />
+      </span>
     </div>
   )
 }

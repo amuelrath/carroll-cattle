@@ -17,34 +17,55 @@ import {
 } from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
 
-function RowDetails({ row }: { row: TSheetRow | undefined }) {
-  const hasEdits = (row?.edits.length || 0) > 0
+function RowEdits({ row }: { row: TSheetRowOut | undefined }) {
+  const edits = row?.edits ?? []
+  if (edits.length === 0) return null
 
   return (
-    <>
-      {hasEdits && (
-        <div>
-          <p className="text-muted-foreground text-sm font-medium">Edits</p>
-          {row?.edits.map(({ key, from, to }) => (
-            <Item key={key}>
-              <ItemContent>
-                <ItemTitle className="flex flex-row items-center gap-1.5 text-sm text-yellow-600">
-                  <span className="size-1.5 translate-y-1/3 rounded-full bg-yellow-600" />
-                  <span>{key}</span>
-                </ItemTitle>
-                <ItemDescription>
-                  <p className="flex flex-row items-center space-x-2">
-                    <p>{from ? `"${from}"` : 'Empty'}</p>
-                    <ArrowRightIcon {...iconSizes.medium} />
-                    <p>{to ? `"${to}"` : 'Empty'}</p>
-                  </p>
-                </ItemDescription>
-              </ItemContent>
-            </Item>
+    <section>
+      <p className="text-muted-foreground mb-2 text-sm font-medium">Edits</p>
+      <div className="flex flex-col gap-3 border-l-2 border-yellow-600/40 pl-3">
+        <AnimatePresence initial={false} mode="popLayout">
+          {edits.map(({ key, from, to }) => (
+            <motion.div
+              key={key}
+              layout
+              initial={{ y: -20, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ x: 100, opacity: 0 }}
+            >
+              <div className="text-xs font-medium text-yellow-600">{key}</div>
+              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-sm">
+                <ValueChip value={from} variant="from" />
+                <ArrowRightIcon className="text-muted-foreground size-3 shrink-0" />
+                <ValueChip value={to} variant="to" />
+              </div>
+            </motion.div>
           ))}
-        </div>
-      )}
-    </>
+        </AnimatePresence>
+      </div>
+    </section>
+  )
+}
+
+function ValueChip({ value, variant }: { value?: string | null; variant: 'from' | 'to' }) {
+  if (!value) {
+    return (
+      <span className="text-muted-foreground rounded-md border border-dashed px-1.5 py-px italic">
+        empty
+      </span>
+    )
+  }
+  return (
+    <span
+      className={
+        variant === 'from' ?
+          'bg-card text-muted-foreground rounded-md border px-1.5 py-px break-all'
+        : 'rounded-md bg-yellow-500/15 px-1.5 py-px break-all text-yellow-700 dark:text-yellow-500'
+      }
+    >
+      {value}
+    </span>
   )
 }
 
@@ -91,45 +112,67 @@ function RowErrors({ errors }: { errors: TCellError[] | undefined }) {
   )
 }
 
-function Screenshot({ src }: { src: string }) {
+function HasIssueCopy() {
   return (
-    <div className="flex flex-col gap-1">
-      <ImageWithExpand imgString={src} className="max-w-full" />
-      <p className="text-muted-foreground text-center text-xs">Click to expand</p>
+    <div>
+      <p className="text-destructive-foreground">Something went wrong during this task.</p>
+      <p className="text-muted-foreground text-xs">
+        Please review and fix any issues before rerunning.
+      </p>
     </div>
   )
 }
 
-function RowProof({ row }: { row: TSheetRow | undefined }) {
-  if (!row) return <></>
-  if (row.state !== 'done') return <></>
-
+function CompleteCopy() {
   return (
-    <section className="flex flex-col gap-2">
-      <p className="text-muted-foreground text-sm font-medium">Result</p>
-      <Screenshot src={row.proof.screenshot} />
-    </section>
+    <div>
+      <p>Task completed.</p>
+      <p className="text-muted-foreground text-xs">You can now review the finished work.</p>
+    </div>
   )
 }
 
-function RowIssue({ issue }: { issue: TRowIssue | undefined }) {
+function IssueFixedCopy() {
   return (
-    <>
-      {issue ?
-        <section className="flex flex-col gap-2">
-          <div className="bg-destructive/10 rounded-md p-4">
-            <p className="text-destructive-foreground font-medium">{issue.hint}</p>
-          </div>
-          <div className="p-4">
-            <Screenshot src={issue.screenshot} />
-          </div>
-        </section>
-      : <div className="flex flex-col items-center justify-center space-y-2">
-          <IconCircle Icon={ThumbsUpIcon} size="small" />
-          <p className="text-muted-foreground text-center text-xs font-medium">No Issues!</p>
-        </div>
-      }
-    </>
+    <div>
+      <p className="text-okay-foreground">Changes Detected</p>
+      <p className="text-muted-foreground text-xs">
+        It looks like you tried to fix an issue with this row. You can now rerun.
+      </p>
+    </div>
+  )
+}
+
+function ReviewRow({ row }: { row: TSheetRowOut | undefined }) {
+  const navigate = useNavigate()
+
+  if (!row) return <></>
+  if (!(row.state === 'done' || row.state === 'issue' || row.state === 'issueFixed')) return <></>
+
+  const hasIssue = row?.state === 'issue'
+  const isComplete = row?.state === 'done'
+  const hasIssueFixed = row?.state === 'issueFixed'
+
+  const handleClick = async () => {
+    await navigate({
+      from: '/jobs/view/',
+      search: (p) => ({ ...p, reviewOpen: true, reviewIdx: row.rowIdx }),
+      replace: true
+    })
+  }
+
+  return (
+    <section className="mb-2 flex flex-col gap-2">
+      <span className="h-14 text-center font-medium">
+        {hasIssue && <HasIssueCopy />}
+        {isComplete && <CompleteCopy />}
+        {hasIssueFixed && <IssueFixedCopy />}
+      </span>
+      <Button onClick={handleClick}>
+        <ScanSearchIcon />
+        Open in Reviewer
+      </Button>
+    </section>
   )
 }
 
@@ -146,7 +189,8 @@ export function RowContext({ sheet }: { sheet: TSheet }) {
   const onTabClick = async (contextTab: 'issues' | 'validation' | 'details') => {
     await navigate({
       from: '/jobs/view/',
-      search: (prev) => ({ ...prev, contextTab })
+      search: (prev) => ({ ...prev, contextTab }),
+      replace: true
     })
   }
 
@@ -172,12 +216,21 @@ export function RowContext({ sheet }: { sheet: TSheet }) {
             </div>
             <TabsTrigger value="details" onClick={() => onTabClick('details')}>
               <span>Details</span>
+              {row?.state === 'issue' && (
+                <AlertTriangleIcon className="text-destructive-foreground" {...iconSizes.medium} />
+              )}
+              {row?.state === 'done' && (
+                <CheckIcon className="text-okay-foreground stroke-3" {...iconSizes.medium} />
+              )}
+              {row?.state === 'issueFixed' && (
+                <BandageIcon className="text-okay-foreground" {...iconSizes.medium} />
+              )}
             </TabsTrigger>
             <TabsTrigger value="validation" onClick={() => onTabClick('validation')}>
               <span>Validation</span>
-            </TabsTrigger>
-            <TabsTrigger value="issues" onClick={() => onTabClick('issues')}>
-              <span>Issues</span>
+              {row?.state === 'invalid' && (
+                <AlertTriangleIcon className="text-destructive-foreground" {...iconSizes.medium} />
+              )}
             </TabsTrigger>
           </TabsList>
           <motion.div
@@ -190,19 +243,15 @@ export function RowContext({ sheet }: { sheet: TSheet }) {
                 <span className="text-muted-foreground text-sm font-bold">
                   Row {(row?.rowIdx || 0) + 1}
                 </span>
-                <span className="text-muted-foreground text-sm font-bold capitalize">
-                  {row?.state}
-                </span>
               </div>
               <TabsContent value="validation">
                 <RowErrors errors={row?.errors} />
               </TabsContent>
-              <TabsContent value="issues">
-                <RowIssue issue={row?.['issue']} />
-              </TabsContent>
               <TabsContent value="details">
-                <RowProof row={row} />
-                <RowDetails row={row} />
+                <div className="flex flex-col gap-4">
+                  <ReviewRow row={row} />
+                  <RowEdits row={row} />
+                </div>
               </TabsContent>
             </div>
           </motion.div>

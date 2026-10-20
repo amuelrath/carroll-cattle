@@ -20,6 +20,10 @@ export function Viewer(): React.JSX.Element {
   const percent = useJobProgress({ jobId })
   const isInactive = thisJobStatus === 'inactive' || thisJobStatus === 'complete'
   const isPaused = thisJobStatus === 'paused'
+
+  const { data: job } = trpc.job.readJobWithTasks.useQuery({ jobId })
+  const hasIssues = job ? job.tasks.some((task) => task.status === 'issue') : false
+
   return (
     <div className="@container-size flex h-full min-h-0 flex-1 flex-col items-center justify-start py-8 2xl:justify-center">
       <div className="border-border relative aspect-video w-[min(calc(100cqw*6/7),calc(100cqh*16/9))] overflow-hidden rounded-md border">
@@ -34,7 +38,7 @@ export function Viewer(): React.JSX.Element {
         <div className="bg-muted absolute inset-0 overflow-hidden rounded-md">
           <AnimatePresence initial={false} mode="wait">
             {isInactive ?
-              <ViewerEmpty key="empty" isComplete={percent === 100} />
+              <ViewerEmpty key="empty" isComplete={percent === 100} hasIssues={hasIssues} />
             : <FramePreview key="preview" />}
           </AnimatePresence>
         </div>
@@ -69,9 +73,9 @@ const ease = 'circInOut'
 type Slide = { from: number; to: number; enter?: number; exit?: number }
 
 const fade: Variants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1, transition: { ease } },
-  exit: { opacity: 0, transition: { ease } }
+  initial: { opacity: 0, scale: 2 },
+  animate: { opacity: 1, transition: { ease }, scale: 1 },
+  exit: { opacity: 0, transition: { ease }, scale: 2 }
 }
 
 const slide: Variants = {
@@ -80,7 +84,12 @@ const slide: Variants = {
   exit: ({ to, exit = 0.3 }: Slide) => ({ y: to, scale: 3, transition: { ease, duration: exit } })
 }
 
-function ViewerEmpty({ isComplete }: { isComplete: boolean }) {
+function ViewerEmpty({ isComplete, hasIssues }: { isComplete: boolean; hasIssues: boolean }) {
+  const Image =
+    isComplete ? <img src={Check} alt="Check" className="size-32 drop-shadow-2xl" />
+    : hasIssues ? <img src={Tools} alt="Tools" className="size-32 drop-shadow-2xl" />
+    : <img src={Camera} alt="computer" className="size-32 drop-shadow-2xl" />
+
   return (
     <MotionDot
       variants={fade}
@@ -90,26 +99,34 @@ function ViewerEmpty({ isComplete }: { isComplete: boolean }) {
       spacing={5}
       className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center"
     >
-      <motion.span variants={slide} custom={{ from: -250, to: -250 }}>
-        {isComplete ?
-          <IconCircle Icon={CheckIcon} size="xlarge" variant="inverse" />
-        : <IconCircle Icon={MonitorIcon} size="xlarge" variant="inverse" />}
+      <motion.span
+        variants={slide}
+        custom={{ from: -250, to: -250 }}
+        className={'from-card mb-4 rounded-full bg-radial to-transparent p-4'}
+      >
+        {Image}
       </motion.span>
       <motion.h2
         variants={slide}
         custom={{ from: 100, to: 150, enter: 0.4, exit: 0.4 }}
-        className="text-primary text-lg font-bold"
+        className="text-primary text-xl font-bold"
       >
-        {isComplete ? 'Job is Complete' : 'Browser is Inactive'}
+        {isComplete ?
+          copy.empty.title.complete
+        : hasIssues ?
+          copy.empty.title.issues
+        : copy.empty.title.noIssues}
       </motion.h2>
       <motion.p
         variants={slide}
         custom={{ from: 150, to: 200, enter: 0.4, exit: 0.3 }}
-        className="font-medium"
+        className="text-muted-foreground text-base font-medium"
       >
         {isComplete ?
-          'All tasks are done. Check row details for proof.'
-        : 'Start a session to see a live view'}
+          copy.empty.description.complete
+        : hasIssues ?
+          copy.empty.description.issues
+        : copy.empty.description.noIssues}
       </motion.p>
     </MotionDot>
   )

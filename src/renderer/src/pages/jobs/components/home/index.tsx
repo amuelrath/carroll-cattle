@@ -4,12 +4,9 @@ import { AutomationsSection } from './components/automations'
 
 export function JobsPage(): React.JSX.Element {
   return (
-    <Page className="flex-col space-y-4">
-      <PageContent className="flex-0">
-        <ActiveSection />
-      </PageContent>
-      <PageContent>
-        <RecentSection />
+    <Page className="flex min-h-0 flex-1 flex-col gap-4">
+      <PageContent className="flex-none">
+        <AutomationsSection />
       </PageContent>
     </Page>
   )
