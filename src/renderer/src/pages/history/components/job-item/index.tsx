@@ -39,7 +39,13 @@ export function JobResults({ searchValue, processValue }: JobResultsProps): Reac
   )
 
   if (filtered.length === 0) {
-    return <EmptyState title="No matching jobs" desc="Try a different search or filter" />
+    return (
+      <EmptyState
+        title="No matching jobs"
+        desc="Try a different search or filter"
+        Icon={<img src={Folder} alt="folder" className="size-20" />}
+      />
+    )
   }
 
   const sortedGroups = Object.entries(Object.groupBy(filtered, (job) => daysAgo(job.createdAt)))
