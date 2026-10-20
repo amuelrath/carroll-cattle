@@ -15,7 +15,7 @@ log.initialize()
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(async () => {
+app.whenReady().then(;async () => {
   // Set app user model id for windows
   electronApp.setAppUserModelId('com.electron')
 
@@ -33,6 +33,9 @@ app.whenReady().then(async () => {
   })
 
   const mainWindow = createMainWindow()
+
+  // Open the Devtools in a sep window
+  mainWindow.webContents.openDevTools({ mode: 'detach' })
 
   // Register tRPC router
   createIPCHandler({ createContext, router: appRouter, windows: [mainWindow] })
