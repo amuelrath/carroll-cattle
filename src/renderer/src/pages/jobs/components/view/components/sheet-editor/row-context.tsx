@@ -1,15 +1,20 @@
-import { IconCircle } from '@renderer/components/common/icon-circle'
-import { ImageWithExpand } from '@renderer/components/common/image-with-expand'
+import ThumbsUp from '@renderer/assets/thumbs-up.png'
 import { PageSidebar } from '@renderer/components/common/page'
-import { Item, ItemContent, ItemDescription, ItemTitle } from '@renderer/components/ui/item'
+import { Button } from '@renderer/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@renderer/components/ui/tabs'
 import { iconSizes } from '@renderer/lib/tokens'
 import { useSheetEditorStore } from '@renderer/pages/jobs/components/view/components/sheet-editor/sheet.store'
-import type { TCellError, TRowIssue, TSheet, TSheetRow } from '@shared/schemas/trpc'
+import type { TCellError, TSheet, TSheetRowOut } from '@shared/schemas/trpc'
 import { useNavigate, useSearch } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { ChevronLeft, ChevronRight } from 'lucide'
-import { AlertTriangleIcon, ArrowRightIcon, ThumbsUpIcon } from 'lucide-react'
+import {
+  AlertTriangleIcon,
+  ArrowRightIcon,
+  BandageIcon,
+  CheckIcon,
+  ScanSearchIcon
+} from 'lucide-react'
 import { MorphIcon } from 'morphicons/react'
 
 function RowDetails({ row }: { row: TSheetRow | undefined }) {
@@ -47,26 +52,41 @@ function RowErrors({ errors }: { errors: TCellError[] | undefined }) {
   const hasErrors = errors && errors.length > 0
 
   return (
-    <section className="flex flex-col gap-2">
-      {hasErrors ?
-        errors.map(({ key, hint }) => (
-          <Item key={key} variant="muted">
-            <ItemContent>
-              <ItemTitle className="text-destructive-foreground flex items-center gap-1.5 text-sm">
-                <AlertTriangleIcon {...iconSizes.medium} />
-                <span>{key}</span>
-              </ItemTitle>
-              <ItemDescription>{hint}</ItemDescription>
-            </ItemContent>
-          </Item>
-        ))
-      : <div className="flex flex-col items-center justify-center space-y-2">
-          <IconCircle Icon={ThumbsUpIcon} size="small" />
-          <p className="text-muted-foreground text-center text-xs font-medium">
-            Everything looks good!
-          </p>
-        </div>
-      }
+    <section>
+      <p className="text-muted-foreground mb-2 text-sm font-medium">Errors</p>
+      <AnimatePresence initial={false} mode="popLayout">
+        {hasErrors ?
+          <div className="border-destructive-foreground/40 flex flex-col gap-3 border-l-2 pl-3">
+            <AnimatePresence initial={false} mode="popLayout">
+              {errors.map(({ key, hint }) => (
+                <motion.div
+                  key={key}
+                  layout="position"
+                  initial={{ y: -20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ x: 100, opacity: 0 }}
+                >
+                  <div className="text-destructive-foreground text-xs font-medium">{key}</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5 text-sm">{hint}</div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        : <motion.div
+            key="okay"
+            initial={{ opacity: 0, rotate: 5 }}
+            animate={{ opacity: 1, rotate: 0 }}
+            exit={{ opacity: 0 }}
+            className="flex flex-col items-center justify-center"
+          >
+            <img src={ThumbsUp} alt="thumbs-up" className="mb-4 size-24" />
+            <p className="font-medium">No Validation Errors</p>
+            <p className="text-muted-foreground text-center text-xs font-medium">
+              Issues with row values will appear here.
+            </p>
+          </motion.div>
+        }
+      </AnimatePresence>
     </section>
   )
 }

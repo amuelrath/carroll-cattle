@@ -5,7 +5,7 @@ import { cn } from '@renderer/lib/utils'
 import type { OnCellUpdate } from '@renderer/pages/jobs/components/view/components/sheet-editor/index'
 import { useSheetEditorStore } from '@renderer/pages/jobs/components/view/components/sheet-editor/sheet.store'
 import { useThisJobStatus } from '@renderer/pages/jobs/components/view/hooks/use-this-job-status'
-import { type TColumn, type TRowState, type TSheetRow, UNUSED } from '@shared/schemas/trpc'
+import { type TColumn, type TRowState, type TSheetRowOut, UNUSED } from '@shared/schemas/trpc'
 import { useNavigate } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { AlertTriangle, Bandage, Check, Play, ThumbsDown } from 'lucide'
@@ -14,7 +14,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 
 interface RowProps {
   columns: TColumn[]
-  row: TSheetRow
+  row: TSheetRowOut
   rowIdx: number
   onCellUpdate: OnCellUpdate
 }
@@ -23,6 +23,8 @@ export const Row = memo(function ({ row, columns, onCellUpdate }: RowProps) {
   const { thisJobStatus } = useThisJobStatus()
   const isActive = useSheetEditorStore((s) => s.activeRow === row.rowIdx)
   const selectRow = useSheetEditorStore((s) => s.selectRow)
+  const setContextOpen = useSheetEditorStore((s) => s.setContextOpen)
+  const navigate = useNavigate()
 
   const numUsedColumns = useMemo(
     () => columns.filter((col) => col.source !== UNUSED).length,
@@ -37,10 +39,22 @@ export const Row = memo(function ({ row, columns, onCellUpdate }: RowProps) {
     [onCellUpdate, row.rowIdx]
   )
 
-  console.log('row rendered')
+  const onRowClick = async () => {
+    selectRow(row.rowIdx)
+
+    if (row.state === 'done' || row.state === 'issue' || row.state === 'issueFixed') {
+      setContextOpen(true)
+      return await navigate({
+        from: '/jobs/view/',
+        search: (p) => ({ ...p, contextTab: 'details' }),
+        replace: true
+      })
+    }
+  }
+
   return (
     <>
-      <TableRow onClick={() => selectRow(row.rowIdx)} className={cn('border-b transition-none')}>
+      <TableRow onClick={onRowClick} className={cn('border-b transition-none')}>
         <TableCell
           className={cn(
             'bg-muted text-muted-foreground sticky left-0 z-10 w-8 justify-items-center text-center text-xs',
@@ -151,7 +165,8 @@ const Cell = memo(function Cell({
     if (state === 'issue') {
       await navigate({
         from: '/jobs/view/',
-        search: (prev) => ({ ...prev, contextTab: 'validation' })
+        search: (prev) => ({ ...prev, contextTab: 'validation' }),
+        replace: true
       })
       setContextOpen(true)
       return
@@ -160,7 +175,8 @@ const Cell = memo(function Cell({
     if (state === 'edit') {
       await navigate({
         from: '/jobs/view/',
-        search: (prev) => ({ ...prev, contextTab: 'details' })
+        search: (prev) => ({ ...prev, contextTab: 'details' }),
+        replace: true
       })
       setContextOpen(true)
     }

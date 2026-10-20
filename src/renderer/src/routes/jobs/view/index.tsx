@@ -7,7 +7,9 @@ const ZMainTab = z.enum(['sheet', 'automation']).default('automation')
 const ZSummarySearch = z.object({
   jobId: z.number(),
   contextTab: ZContextTabs,
-  mainTab: ZMainTab
+  mainTab: ZMainTab,
+  reviewOpen: z.boolean().default(false),
+  reviewIdx: z.number().int().default(0)
 })
 
 export const Route = createFileRoute('/jobs/view/')({

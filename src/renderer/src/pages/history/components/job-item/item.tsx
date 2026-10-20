@@ -16,9 +16,9 @@ import React from 'react'
 export function JobItem({ job }: { job: TReadAllJobsRes[number] }): React.JSX.Element {
   return (
     <JobProvider job={job}>
-      <div className="group hover:bg-muted/80 grid w-full grid-cols-2 p-4 transition-colors">
-        <div className="">
-          <Link to="/jobs/view" search={{ jobId: job.id }}>
+      <div className="group hover:bg-muted/80 grid w-full grid-cols-4 p-4 transition-colors">
+        <div className="col-span-3">
+          <Link to="/jobs/view" draggable={false} search={{ jobId: job.id }}>
             <div className="flex flex-row items-center space-x-4">
               <JobIcon />
               <JobTitle />

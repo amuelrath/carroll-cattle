@@ -12,12 +12,13 @@ import { iconSizes } from '@renderer/lib/tokens'
 import { trpc } from '@renderer/lib/trpc'
 import { useJobItem } from '@renderer/pages/history/components/job-item/context'
 import { sheetToJson } from '@shared/lib/sheet'
+import { useNavigate } from '@tanstack/react-router'
 import {
-  AlertTriangleIcon,
   DownloadIcon,
   EllipsisIcon,
   FileTextIcon,
   PencilIcon,
+  ScanSearchIcon,
   TrashIcon
 } from 'lucide-react'
 import React, { useState } from 'react'
@@ -30,6 +31,9 @@ export function JobDropdown(): React.JSX.Element {
       title: jobTitle
     }
   } = useJobItem()
+
+  const navigate = useNavigate()
+
   const [deleteOpen, setDeleteOpen] = useState(false)
   const [renameOpen, setRenameOpen] = useState(false)
 
@@ -84,6 +88,13 @@ export function JobDropdown(): React.JSX.Element {
     })
   }
 
+  const handleOpenReview = async () => {
+    await navigate({
+      to: '/jobs/view',
+      search: (p) => ({ ...p, jobId, reviewOpen: true })
+    })
+  }
+
   return (
     <>
       <DropdownMenu>
@@ -102,6 +113,7 @@ export function JobDropdown(): React.JSX.Element {
               openRename={() => setRenameOpen(true)}
               openFile={handleOpenFile}
               downloadSheet={handleDownloadSheet}
+              openReview={handleOpenReview}
             />
           </DropdownMenuContent>
         </div>
@@ -134,12 +146,14 @@ export function JobActions({
   openDelete,
   openFile,
   downloadSheet,
-  openRename
+  openRename,
+  openReview
 }: {
   openDelete: () => void
   openFile: () => void
   downloadSheet: () => void
   openRename: () => void
+  openReview: () => void
 }): React.JSX.Element {
   return (
     <div className="space-y-1">
@@ -150,17 +164,17 @@ export function JobActions({
       <hr />
       <DropdownMenuItem onClick={openFile} className="flex flex-row items-center text-sm">
         <FileTextIcon className="text-muted-foreground size-3" />
-        <span>Open original file</span>
+        <span>Open in Excel</span>
       </DropdownMenuItem>
       <hr />
 
-      <DropdownMenuItem className="flex flex-row items-center text-sm">
-        <AlertTriangleIcon className="text-muted-foreground size-3" />
-        <span>Review Issues</span>
+      <DropdownMenuItem onClick={openReview} className="flex flex-row items-center text-sm">
+        <ScanSearchIcon className="text-muted-foreground size-3" />
+        <span>Review</span>
       </DropdownMenuItem>
       <DropdownMenuItem onClick={downloadSheet} className="flex flex-row items-center text-sm">
         <DownloadIcon className="text-muted-foreground size-3" />
-        <span>Export Results</span>
+        <span>Export Sheet</span>
       </DropdownMenuItem>
       <hr />
       <DropdownMenuItem
