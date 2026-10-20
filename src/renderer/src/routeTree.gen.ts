@@ -9,18 +9,17 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as HistoryIndexRouteImport } from './routes/history/index'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as HistoryIndexRouteImport } from './routes/history/index'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
-import { Route as JobsNewIndexRouteImport } from './routes/jobs/new/index'
-import { Route as JobsValidateIndexRouteImport } from './routes/jobs/validate/index'
-import { Route as JobsViewIndexRouteImport } from './routes/jobs/view/index'
 import { Route as SettingsIndexRouteImport } from './routes/settings/index'
+import { Route as JobsNewIndexRouteImport } from './routes/jobs/new/index'
+import { Route as JobsViewIndexRouteImport } from './routes/jobs/view/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 const HistoryIndexRoute = HistoryIndexRouteImport.update({
   id: '/history/',
@@ -42,15 +41,10 @@ const JobsNewIndexRoute = JobsNewIndexRouteImport.update({
   path: '/jobs/new/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsValidateIndexRoute = JobsValidateIndexRouteImport.update({
-  id: '/jobs/validate/',
-  path: '/jobs/validate/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const JobsViewIndexRoute = JobsViewIndexRouteImport.update({
   id: '/jobs/view/',
   path: '/jobs/view/',
-  getParentRoute: () => rootRouteImport
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -59,7 +53,6 @@ export interface FileRoutesByFullPath {
   '/jobs/': typeof JobsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/jobs/new/': typeof JobsNewIndexRoute
-  '/jobs/validate/': typeof JobsValidateIndexRoute
   '/jobs/view/': typeof JobsViewIndexRoute
 }
 export interface FileRoutesByTo {
@@ -68,7 +61,6 @@ export interface FileRoutesByTo {
   '/jobs': typeof JobsIndexRoute
   '/settings': typeof SettingsIndexRoute
   '/jobs/new': typeof JobsNewIndexRoute
-  '/jobs/validate': typeof JobsValidateIndexRoute
   '/jobs/view': typeof JobsViewIndexRoute
 }
 export interface FileRoutesById {
@@ -78,15 +70,14 @@ export interface FileRoutesById {
   '/jobs/': typeof JobsIndexRoute
   '/settings/': typeof SettingsIndexRoute
   '/jobs/new/': typeof JobsNewIndexRoute
-  '/jobs/validate/': typeof JobsValidateIndexRoute
   '/jobs/view/': typeof JobsViewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    '/' | '/history/' | '/jobs/' | '/settings/' | '/jobs/new/' | '/jobs/validate/' | '/jobs/view/'
+    '/' | '/history/' | '/jobs/' | '/settings/' | '/jobs/new/' | '/jobs/view/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/jobs' | '/settings' | '/jobs/new' | '/jobs/validate' | '/jobs/view'
+  to: '/' | '/history' | '/jobs' | '/settings' | '/jobs/new' | '/jobs/view'
   id:
     | '__root__'
     | '/'
@@ -94,7 +85,6 @@ export interface FileRouteTypes {
     | '/jobs/'
     | '/settings/'
     | '/jobs/new/'
-    | '/jobs/validate/'
     | '/jobs/view/'
   fileRoutesById: FileRoutesById
 }
@@ -104,7 +94,6 @@ export interface RootRouteChildren {
   JobsIndexRoute: typeof JobsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
   JobsNewIndexRoute: typeof JobsNewIndexRoute
-  JobsValidateIndexRoute: typeof JobsValidateIndexRoute
   JobsViewIndexRoute: typeof JobsViewIndexRoute
 }
 
@@ -145,13 +134,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof JobsNewIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/validate/': {
-      id: '/jobs/validate/'
-      path: '/jobs/validate'
-      fullPath: '/jobs/validate/'
-      preLoaderRoute: typeof JobsValidateIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/jobs/view/': {
       id: '/jobs/view/'
       path: '/jobs/view'
@@ -168,8 +150,7 @@ const rootRouteChildren: RootRouteChildren = {
   JobsIndexRoute: JobsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
   JobsNewIndexRoute: JobsNewIndexRoute,
-  JobsValidateIndexRoute: JobsValidateIndexRoute,
-  JobsViewIndexRoute: JobsViewIndexRoute
+  JobsViewIndexRoute: JobsViewIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
