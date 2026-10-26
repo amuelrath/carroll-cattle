@@ -2,7 +2,7 @@ import { postWcMessage } from '@main/core/ipc'
 import type { TAction, TActionOutput, TActionType } from '@shared/automation'
 import { AbortedError, rehydrateError } from '@shared/automation/errors'
 import { type TWorkerRequest, ZWorkerResponse } from '@shared/schemas/protocol.schemas'
-import { MessageChannelMain, utilityProcess, UtilityProcess, WebContents } from 'electron'
+import { app, MessageChannelMain, utilityProcess, UtilityProcess, WebContents } from 'electron'
 import { EventEmitter } from 'node:events'
 import path from 'path'
 
@@ -69,6 +69,17 @@ class PlaywrightRPC extends EventEmitter {
   }
 }
 
+const browsersPath =
+  app.isPackaged ?
+    path.join(
+      process.resourcesPath,
+      'app.asar.unpacked',
+      'node_modules',
+      'playwright-core',
+      '.local-browsers'
+    )
+  : '0'
+
 export class WorkerService extends EventEmitter {
   public rpc: PlaywrightRPC | undefined = undefined
   private name = 'automation-driver'
@@ -84,7 +95,9 @@ export class WorkerService extends EventEmitter {
     if (this.rpc) throw new Error('[WorkerService] Cannot spawn: PlaywrightRPC already registered.')
 
     this.child = utilityProcess.fork(path.join(__dirname, 'worker.js'), [], {
-      serviceName: this.name
+      serviceName: this.name,
+      allowLoadingUnsignedLibraries: true,
+      env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: browsersPath }
     })
 
     this.rpc = new PlaywrightRPC(this.child)
