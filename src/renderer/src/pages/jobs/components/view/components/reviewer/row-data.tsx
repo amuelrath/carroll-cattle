@@ -1,17 +1,21 @@
-import { type TSheetRowOut, UNUSED } from '@shared/schemas/trpc'
+import { type TColumn, type TSheetRowOut, UNUSED } from '@shared/schemas/trpc'
 import { AnimatePresence, motion } from 'framer-motion'
 
 const spring = { type: 'spring', stiffness: 500, damping: 40 } as const
 
 export function ReviewerRowData({
-  currRow
+  currRow,
+  columns
 }: {
   currRow: Exclude<TSheetRowOut, { state: 'invalid' } | { state: 'ready' }> | undefined
+  columns: TColumn[]
 }) {
   if (!currRow) return null
 
+  const usedColumns = columns.filter((col) => col.key !== UNUSED).map((col) => col.source)
+
   const displayRow = Object.entries(currRow.copyRow).filter(
-    (entry): entry is [string, string] => entry[0] !== UNUSED && !isEmpty(entry[1])
+    (entry): entry is [string, string] => usedColumns.includes(entry[0]) && !isEmpty(entry[1])
   )
 
   return (
@@ -30,7 +34,7 @@ export function ReviewerRowData({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
             transition={spring}
-            className="bg-muted-foreground flex w-30 shrink-0 flex-col items-start rounded p-2 text-white"
+            className="bg-muted-foreground flex min-w-30 shrink-0 flex-col items-start rounded p-2 text-white"
           >
             <p>{label}</p>
             <ChipValue value={value} />
@@ -51,7 +55,7 @@ function ChipValue({ value }: { value: string }) {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -8, opacity: 0 }}
           transition={spring}
-          className="truncate font-bold"
+          className="line-clamp-1 font-bold"
         >
           {value}
         </motion.p>

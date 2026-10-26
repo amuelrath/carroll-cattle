@@ -114,7 +114,7 @@ function ReviewerContent({ sheet }: { sheet: TMappedSheet }) {
           )}
         </AnimatePresence>
       </div>
-      <ReviewerRowData currRow={currRow} />
+      <ReviewerRowData currRow={currRow} columns={sheet.columns} />
       <ReviewerFooter allRows={sheet.rows} attemptedRows={attemptedRows} />
     </DialogContent>
   )
