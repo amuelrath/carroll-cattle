@@ -4,7 +4,7 @@ import React from 'react'
 import { processIcons } from './_copy'
 
 export function JobSidebar(): React.JSX.Element {
-  const { data, isLoading } = trpc.process.fetchProcesses.useQuery()
+  const { data, isLoading } = trpc.process.readAutomationProcesses.useQuery()
 
   return (
     <TabsList variant="ghost" className="w-full">

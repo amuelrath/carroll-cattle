@@ -1,3 +1,6 @@
+import Flush from '@renderer/assets/eyedropper.png'
+import PregCheck from '@renderer/assets/magnify.png'
+import Breeding from '@renderer/assets/test-tube.png'
 import { PageTitlebar, PageTitlebarButtonGroup } from '@renderer/components/common/page'
 import {
   Accordion,
@@ -19,6 +22,12 @@ import { FileUpload } from '../file-upload'
 import { contentCopy as copy } from './_copy'
 import { DataDefinitionTable, ExampleDataTable } from './tables'
 
+const processImgs = {
+  flush: Flush,
+  breeding: Breeding,
+  pregCheck: PregCheck
+}
+
 interface JobContentProps {
   processId: TProcessId
 }
@@ -34,7 +43,7 @@ function downloadTemplate(processId: TProcessId, name: string) {
 }
 
 export function JobContent({ processId }: JobContentProps): React.JSX.Element {
-  const { data, isLoading } = trpc.process.fetchProcesses.useQuery()
+  const { data, isLoading } = trpc.process.readAutomationProcesses.useQuery()
 
   if (isLoading || !data) return <></>
 
