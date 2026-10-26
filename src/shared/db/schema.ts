@@ -192,14 +192,8 @@ export const relations = defineRelations(
       })
     },
     files: {
-      rows: r.many.fileRows({
-        from: r.files.id,
-        to: r.fileRows.fileId
-      }),
-      jobs: r.many.jobs({
-        from: r.files.id,
-        to: r.jobs.fileId
-      })
+      rows: r.many.fileRows({ from: r.files.id, to: r.fileRows.fileId }),
+      jobs: r.many.jobs({ from: r.files.id, to: r.jobs.fileId })
     },
     fileRows: {
       file: r.one.files({

@@ -108,6 +108,37 @@ const handlers: { [K in TActionType]: Handler<K> } = {
   },
   getUrl: async ({ page }) => {
     return page.url()
+  },
+  waitForHidden: async ({ locate }, action) => {
+    return await locate(action.target).waitFor({ state: 'hidden' })
+  },
+  waitForRowCount: async ({ page, ensure }, action) => {
+    const timeout = 3_000
+    const settleMs = 500
+    const table = await ensure(action.target)
+    const rows = table.locator('tbody tr')
+    const deadline = Date.now() + timeout
+
+    // 1. wait for the count to move off `from`
+    let count = await rows.count()
+    while (count === action.input) {
+      if (Date.now() > deadline)
+        throw new Error(`Table row count stayed at ${action.input} for ${timeout}ms`)
+      await page.waitForTimeout(100)
+      count = await rows.count()
+    }
+
+    // 2. wait for it to stop changing (handles incremental renders)
+    let stableSince = Date.now()
+    while (Date.now() - stableSince < settleMs) {
+      if (Date.now() > deadline) break
+      await page.waitForTimeout(50)
+      const next = await rows.count()
+      if (next !== count) {
+        count = next
+        stableSince = Date.now()
+      }
+    }
   }
 }
 

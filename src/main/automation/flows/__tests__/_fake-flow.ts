@@ -1,11 +1,23 @@
+import type { ScopeNode } from '@main/automation/site'
 import type { Flow } from '@main/automation/types'
 import { type AnyAction, type TAction } from '@shared/automation/act'
 import type { TSelector } from '@shared/automation/sel'
 
+export const fakePage = <S extends ScopeNode>(
+  scope: S,
+  values: Partial<Record<keyof S, string | number | undefined>>
+) => {
+  const entries = (Object.entries(values) as [keyof S, string | number | undefined][])
+    .filter((e): e is [keyof S, string | number] => e[1] !== undefined)
+    .map(([key, value]) => [scope[key] as TSelector, value] as const)
+
+  return pageResponses(new Map<TSelector, string | number>(entries))
+}
+
 /** Answers actions by looking up the target selector.
  *  In the map = visible with that text. Not in the map = not visible. */
-export const fakePage =
-  (texts?: Map<TSelector, string | undefined>) => (_stepIdx: number, action: TAction) => {
+export const pageResponses =
+  (texts?: Map<TSelector, string | number | undefined>) => (_stepIdx: number, action: TAction) => {
     const target = action.target?.[0]
     switch (action.type) {
       case 'getIsVisible':
@@ -18,19 +30,6 @@ export const fakePage =
         return undefined // waitForVisible, click, ...
     }
   }
-
-export const fakePages = (
-  before: Map<TSelector, string>,
-  after: Map<TSelector, string>,
-  submit: TSelector
-) => {
-  let submitted = false
-  return (i: number, action: TAction) => {
-    const res = fakePage(submitted ? after : before)(i, action)
-    if (action.type === 'click' && action.target?.[0] === submit) submitted = true
-    return res
-  }
-}
 
 export function fakeFlow<R>(flow: Flow<R>, handle: (stepIdx: number, action: TAction) => unknown) {
   const actions: TAction[] = []

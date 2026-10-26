@@ -27,3 +27,11 @@ export const processSeed: TInsertProcess[] = [
   //   desc: 'Add new embryo shipment to inventory in CattleMax.'
   // },
 ]
+
+// export const utilityProcessSeed: TInsertUtilityProcess[] = [
+//   {
+//     id: 'transOvaInventory',
+//     name: 'Inventory Reconciliation',
+//     desc: 'Ensure that reported production matches inventory.'
+//   }
+// ]

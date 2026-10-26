@@ -26,24 +26,19 @@ export const site = {
     },
     profile: {
       name: sel.css('#header-title-subtitle > span.page-title'),
-      secondaryName: sel.css('div.wrapper.animal_name > dd'),
       breedingTab: {
         $enter: sel.css('[aria-controls="breeding"]'),
-        firstPregCheck: {
-          $enter: sel.css(
-            `#pregnancy_checks_container table tbody tr:first-child td:nth-child(1) a`
-          ),
-          modal: {
-            modalContent: sel.css('#main-modal > div > div'),
-            date: sel.css('div.wrapper.pregnancy_check_check_date > dd'),
-            method: sel.css('div.wrapper.pregnancy_check_check_method > dd'),
-            result: sel.css('div.wrapper.pregnancy_check_result > dd'),
-            technician: sel.css('div.wrapper.pregnancy_check_technician > dd'),
-            comments: sel.css('div.wrapper.pregnancy_check_comments > dd'),
-            sex: sel.css('div.wrapper.pregnancy_check_ultrasound_sex > dd'),
-            timePreg: sel.css('div.wrapper.pregnancy_check_time_pregnant > dd'),
-            cancel: sel.css('#main-modal > div > div > div.modal-footer > a.btn.btn-default')
-          }
+        pregCheckTable: sel.css('#pregnancy_checks_container table'),
+        pregCheckModal: {
+          modalContent: sel.css('#main-modal > div > div'),
+          date: sel.css('div.wrapper.pregnancy_check_check_date > dd'),
+          method: sel.css('div.wrapper.pregnancy_check_check_method > dd'),
+          result: sel.css('div.wrapper.pregnancy_check_result > dd'),
+          technician: sel.css('div.wrapper.pregnancy_check_technician > dd'),
+          comments: sel.css('div.wrapper.pregnancy_check_comments > dd'),
+          sex: sel.css('div.wrapper.pregnancy_check_ultrasound_sex > dd'),
+          timePreg: sel.css('div.wrapper.pregnancy_check_time_pregnant > dd'),
+          cancel: sel.css('#main-modal > div > div > div.modal-footer > a.btn.btn-default')
         },
         pregCheckForm: {
           $enter: sel.id('#new-pregnancy-check'),
@@ -56,24 +51,22 @@ export const site = {
           timePregnant: sel.id('#pregnancy_check_time_pregnant'),
           submit: sel.css('[data-disable-with="Saving Pregnancy Check"]')
         },
-        firstBreeding: {
-          $enter: sel.css('#breedings_container table tbody tr:first-child td:nth-child(1) a'),
-          modal: {
-            modalContent: sel.css('#main-modal > div > div'),
-            date: sel.css('div.wrapper.breeding_breeding_date > dd'),
-            method: sel.css('div.wrapper.breeding_breeding_method > dd'),
-            bullTag: sel.css('div.wrapper.breeding_sire > dd'),
-            // possibly get the link instead for extra verification
-            embryo: sel.css('div.wrapper.breeding_embryo > dd'),
-            clSide: sel.css('div.wrapper.breeding_embryo_cl_side > dd'),
-            comments: sel.css('div.wrapper.breeding_comments > dd'),
-            cancel: sel.css('#main-modal > div > div > div.modal-footer > a.btn.btn-default'),
-            // WatchMe: for some reason 'technician' gets rendered twice in the modal.
-            technician: sel.css(
-              '#main-modal > div > div > div.modal-body > dl > div > div > div:nth-child(2) > dd'
-            )
-          }
+        breedingModal: {
+          modalContent: sel.css('#main-modal > div > div'),
+          date: sel.css('div.wrapper.breeding_breeding_date > dd'),
+          method: sel.css('div.wrapper.breeding_breeding_method > dd'),
+          bullTag: sel.css('div.wrapper.breeding_sire > dd'),
+          // possibly get the link instead for extra verification
+          embryo: sel.css('div.wrapper.breeding_embryo > dd'),
+          clSide: sel.css('div.wrapper.breeding_embryo_cl_side > dd'),
+          comments: sel.css('div.wrapper.breeding_comments > dd'),
+          cancel: sel.css('#main-modal > div > div > div.modal-footer > a.btn.btn-default'),
+          // WatchMe: for some reason 'technician' gets rendered twice in the modal.
+          technician: sel.css(
+            '#main-modal > div > div > div.modal-body > dl > div > div > div:nth-child(2) > dd'
+          )
         },
+        breedingTable: sel.css('#breedings_container table'),
         breedingForm: {
           $enter: sel.id('#new-breeding'),
           method: sel.id('#breeding_breeding_method'),
@@ -88,6 +81,44 @@ export const site = {
             searchbar: sel.role('combobox', { name: 'Bull' })
           },
           submit: sel.css('[data-disable-with="Saving Breeding"]')
+        }
+      },
+      embryoTab: {
+        $enter: sel.role('tab', { name: 'Embryo' }),
+        flushTable: sel.id('#flushes_table'),
+        flushModal: {
+          modalContent: sel.css('#main-modal > div > div'),
+          date: sel.css('div.wrapper.flush_flush_date > dd'),
+          sireTag: sel.css('div.wrapper.flush_sire_animal_id > dd'),
+          type: sel.css('div.wrapper.flush_flush_type > dd'),
+          recovered: sel.css('div.wrapper.flush_recovered > dd'),
+          usable: sel.css('div.wrapper.flush_usable > dd'),
+          unfertilized: sel.css('div.wrapper.flush_unfertilized > dd'),
+          degenerate: sel.css('div.wrapper.flush_degenerate > dd'),
+          discarded: sel.css('div.wrapper.flush_discarded > dd'),
+          transferred: sel.css('div.wrapper.flush_transferred > dd'),
+          frozen: sel.css('div.wrapper.flush_embryos_frozen > dd'),
+          comments: sel.css('div.wrapper.flush_comments > dd'),
+          cancel: sel.css('#main-modal > div > div > div.modal-footer > a.btn.btn-default')
+        },
+        flushForm: {
+          $enter: sel.role('link', { name: 'New Flush' }),
+          date: sel.id('#flush_flush_date'),
+          type: sel.id('#flush_flush_type'),
+          comments: sel.id('#flush_comments'),
+          recovered: sel.id('#flush_recovered'),
+          degenerate: sel.id('#flush_degenerate'),
+          unfertilized: sel.id('#flush_unfertilized'),
+          discarded: sel.id('#flush_discarded'),
+          usable: sel.id('#flush_usable'),
+          transferred: sel.id('#flush_transferred'),
+          frozen: sel.id('#flush_embryos_frozen'),
+          bull: {
+            $enter: sel.id('#s2id_flush_sire_animal_id'),
+            searchbar: sel.role('combobox', { name: 'Sire' })
+          },
+          cancel: sel.text('Cancel'),
+          submit: sel.text('Create Flush')
         }
       }
     },
@@ -105,8 +136,10 @@ export type Authed = typeof site.authed
 export type SearchResult = typeof site.authed.searchResult
 export type Profile = typeof site.authed.profile
 export type BreedingTab = typeof site.authed.profile.breedingTab
-export type PregCheckModal = typeof site.authed.profile.breedingTab.firstPregCheck.modal
-export type BreedingModal = typeof site.authed.profile.breedingTab.firstBreeding.modal
+export type PregCheckModal = typeof site.authed.profile.breedingTab.pregCheckModal
+export type BreedingModal = typeof site.authed.profile.breedingTab.breedingModal
+export type EmbryoTab = typeof site.authed.profile.embryoTab
+export type FlushModal = typeof site.authed.profile.embryoTab.flushModal
 
 export type ScopeProvider<TNode extends ScopeNode, TReturn extends ScopeNode | void = void> = (
   scope: TNode,

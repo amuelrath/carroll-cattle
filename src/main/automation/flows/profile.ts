@@ -14,6 +14,8 @@ import { ZAnimalSearchResultRow } from '@shared/schemas/jobs/site.schemas'
 import { errors } from 'playwright'
 
 export function findMatchingTagOrThrow(earTag: string, results: Record<string, unknown>[]) {
+  console.log(results)
+
   if (!results || !Array.isArray(results))
     throw new RowIssue('NOT_FOUND', `Search for "${earTag}" yielded no active animals.`)
 
@@ -44,8 +46,12 @@ export const resolveSearchResults = function* (scope, earTag: string) {
   if (!hasResults)
     throw new RowIssue('NOT_FOUND', `Search for "${earTag}" yielded no active animals.`)
 
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  const cssString = (s: string) => s.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+  const tagPattern = cssString(`^${escapeRegex(earTag)}$`)
+
   try {
-    yield* act.click(sel.css(`tr:has(td:text-is("Active")) a:text-is("${earTag}")`))
+    yield* act.click(sel.css(`tr:has(td:text-is("Active")) a:text-matches("${tagPattern}", "i")`))
   } catch (err) {
     // Try to get a RowIssue
     // Otherwise act.click would just throw a TimeoutError
@@ -96,3 +102,12 @@ export const openBreedingTab = function* (scope) {
 
   return breedingTab
 } satisfies ScopeProvider<Profile, BreedingTab>
+
+export const openEmbryoTab = function* (scope) {
+  const { embryoTab } = scope
+  yield* act.waitForVisible(embryoTab.$enter)
+  yield* act.click(embryoTab.$enter)
+  yield* act.waitForVisible(embryoTab.flushForm.$enter)
+
+  return embryoTab
+} satisfies ScopeProvider<Profile, EmbryoTab>

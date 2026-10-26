@@ -27,6 +27,9 @@ const ready = (async () => {
     strictSelectors: true
   })
 
+  // WatchMe: dialogs will always be accepted.
+  ctx.on('dialog', (dialog) => dialog.accept())
+
   page = await ctx.newPage()
   ctx.setDefaultTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT)
 

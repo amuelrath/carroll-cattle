@@ -53,6 +53,10 @@ export const actions = {
     target: true,
     output: z.void()
   },
+  waitForHidden: {
+    target: true,
+    output: z.void()
+  },
   waitForText: {
     target: true,
     input: z.string(),
@@ -65,6 +69,11 @@ export const actions = {
   getUrl: {
     target: false,
     output: z.string()
+  },
+  waitForRowCount: {
+    target: true,
+    input: z.number(),
+    output: z.void()
   }
 } as const satisfies Record<string, ActionDef>
 
