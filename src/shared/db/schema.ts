@@ -19,6 +19,14 @@ export type TJobStatus = z.infer<typeof ZJobStatus>
 export const ZTaskStatus = z.enum(['done', 'issue', 'notDone'])
 export type TTaskStatus = z.infer<typeof ZTaskStatus>
 
+export const credentials = sqliteTable('credentials', {
+  username: text().notNull(),
+  password: text().notNull()
+})
+
+export type TSelectCredentials = InferSelectModel<typeof credentials>
+export type TInsertCredentials = InferInsertModel<typeof credentials>
+
 export const processes = sqliteTable('processes', {
   id: text().primaryKey().$type<TProcessId>(),
   name: text().notNull(),
