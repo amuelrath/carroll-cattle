@@ -42,20 +42,6 @@ export const jobsRepo = {
       }
     })
   },
-  /* Get all jobs with their process and file */
-  readRecent: async (db: Executor) => {
-    return await db.query.jobs.findMany({
-      with: {
-        process: true,
-        file: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      limit: 7
-    })
-  },
-
   readAll: (db: Executor) => {
     return db.query.jobs.findMany({
       with: {
