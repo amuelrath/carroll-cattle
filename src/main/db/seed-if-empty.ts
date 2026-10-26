@@ -3,7 +3,6 @@ import log from 'electron-log/main'
 import { getDb } from './'
 import { processSeed } from './_data'
 
-// ToDo seed data should live near here
 export async function seedIfEmpty() {
   try {
     const existingProcesses = await getDb().select().from(processes).limit(1)

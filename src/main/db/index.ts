@@ -1,4 +1,3 @@
-import 'dotenv/config'
 import { relations } from '@shared/db/schema'
 import { drizzle } from 'drizzle-orm/libsql'
 import { app } from 'electron'

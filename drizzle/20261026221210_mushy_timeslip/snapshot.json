@@ -1,11 +1,15 @@
 {
   "version": "7",
   "dialect": "sqlite",
-  "id": "811373ea-efb3-47c5-9f3f-c0d9186f9a10",
+  "id": "ce8a6e85-f578-4caf-a573-9215cd7c5388",
   "prevIds": [
     "00000000-0000-0000-0000-000000000000"
   ],
   "ddl": [
+    {
+      "name": "credentials",
+      "entityType": "tables"
+    },
     {
       "name": "fileRows",
       "entityType": "tables"
@@ -33,6 +37,26 @@
     {
       "name": "tasks",
       "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "username",
+      "entityType": "columns",
+      "table": "credentials"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "password",
+      "entityType": "columns",
+      "table": "credentials"
     },
     {
       "type": "integer",

@@ -10,7 +10,8 @@ export default defineConfig({
       alias: {
         '@main': resolve('src/main'),
         '@shared': resolve('src/shared'),
-        '@utility': resolve('src/utility')
+        '@utility': resolve('src/utility'),
+        '@resources': resolve('resources')
       }
     },
     build: {

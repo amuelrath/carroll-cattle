@@ -2,7 +2,7 @@ import 'source-map-support/register'
 import { electronApp, optimizer } from '@electron-toolkit/utils'
 import { getDb } from '@main/db'
 import { runMigrations } from '@main/lib/migrations'
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, dialog } from 'electron'
 import log from 'electron-log/main'
 import { createIPCHandler } from 'trpc-electron/main'
 import { createMainWindow } from './core/main-window'
@@ -17,11 +17,18 @@ log.initialize()
 // Some APIs can only be used after this event occurs.
 app.whenReady().then(async () => {
   // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+  electronApp.setAppUserModelId('com.carrollcattlecompany.automation')
 
   // Initialize DB and seed.
-  await runMigrations(getDb())
-  await seedIfEmpty()
+  try {
+    await runMigrations(getDb())
+    await seedIfEmpty()
+  } catch (err) {
+    log.error(err)
+    dialog.showErrorBox('Database error', String(err))
+    app.quit()
+    return
+  }
 
   console.log(app.getPath('userData'))
 
@@ -35,7 +42,7 @@ app.whenReady().then(async () => {
   const mainWindow = createMainWindow()
 
   // Open the Devtools in a sep window
-  mainWindow.webContents.openDevTools({ mode: 'detach' })
+  // mainWindow.webContents.openDevTools({ mode: 'detach' })
 
   // Register tRPC router
   createIPCHandler({ createContext, router: appRouter, windows: [mainWindow] })

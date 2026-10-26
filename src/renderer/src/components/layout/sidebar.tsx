@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import React from 'react'
 import { Button } from '../ui/button'
 
-export function SideBar(): React.JSX.Element {
+export function SideBar({ version }: { version: string }): React.JSX.Element {
   const router = useRouter()
   const matchRoute = useMatchRoute()
 
@@ -50,6 +50,7 @@ export function SideBar(): React.JSX.Element {
           )
         })}
       </div>
+      <p className="text-muted-foreground mb-2 text-xs">{version}</p>
     </aside>
   )
 }

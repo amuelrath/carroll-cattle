@@ -17,6 +17,8 @@ export const exampleRows = {
       sex: 'Heifer',
       result: 'Pregnant',
       technician: 'Dr. White',
+      // @ts-ignore its okay
+      timePreg: '',
       comments: 'Approx. 60 days bred, strong heartbeat.'
     },
     {
@@ -33,6 +35,10 @@ export const exampleRows = {
       method: 'Blood',
       result: 'Recheck',
       technician: 'Dr. Alvarez',
+      // @ts-ignore its okay
+      timePreg: '',
+      // @ts-ignore its okay
+      sex: '',
       comments: 'Recheck in 2 weeks.'
     }
   ],

@@ -1,4 +1,6 @@
+import { credentialsRouter } from '@main/trpc/routers/credentials'
 import { fileRouter } from '@main/trpc/routers/file'
+import { infoRouter } from '@main/trpc/routers/info'
 import { automationRouter } from './routers/automation'
 import { dialogRouter } from './routers/dialog'
 import { jobRouter } from './routers/job'
@@ -9,6 +11,7 @@ import { windowRouter } from './routers/window'
 import { router } from './trpc'
 
 export const appRouter = router({
+  info: infoRouter,
   window: windowRouter,
   dialog: dialogRouter,
   sheet: sheetRouter,

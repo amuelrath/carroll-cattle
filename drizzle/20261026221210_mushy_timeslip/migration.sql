@@ -1,3 +1,9 @@
+CREATE TABLE `credentials`
+(
+    `username` text NOT NULL,
+    `password` text NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE `fileRows`
 (
     `fileId`      integer NOT NULL,
