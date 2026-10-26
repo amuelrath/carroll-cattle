@@ -60,9 +60,14 @@ export function JobContent({ processId }: JobContentProps): React.JSX.Element {
       className="flex min-h-0 min-w-0 flex-1 flex-col gap-2 overflow-hidden"
     >
       <PageTitlebar>
-        <div>
-          <p>{name}</p>
-          <p className="text-muted-foreground text-sm font-normal">{desc}</p>
+        <div className="flex flex-row items-center space-x-4">
+          <div className="bg-muted rounded-full p-1">
+            <img src={processImgs[processId]} className="size-10" />
+          </div>
+          <div>
+            <p>{name}</p>
+            <p className="text-muted-foreground text-sm font-normal">{desc}</p>
+          </div>
         </div>
         <PageTitlebarButtonGroup>
           <Button size="sm" variant="secondary" onClick={handleTemplateDownload}>
@@ -78,7 +83,7 @@ export function JobContent({ processId }: JobContentProps): React.JSX.Element {
             <ItemDescription>{copy.callout}</ItemDescription>
           </ItemContent>
         </Item>
-        <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto">
+        <div className="scrollbar-custom flex min-h-0 flex-1 flex-col gap-4 overflow-y-scroll pr-2">
           {/* if there is no value, entire content layout width shifts */}
           <Accordion defaultValue={['example-data']}>
             <AccordionItem value="example-data">

@@ -47,7 +47,7 @@ export const exampleRows = {
       caneNo: 'C-12',
       strawNo: 'S-0458',
       clSide: 'Left',
-      comments: 'Grade 1 embryo, recipient in good condition'
+      comments: ''
     },
     {
       method: 'AI',
@@ -64,8 +64,11 @@ export const exampleRows = {
       bullTag: 'B-307',
       donorTag: 'D-1150',
       date: '2026-10-02',
-      technician: '',
-      comments: 'Second attempt after open result in August'
+      technician: 'Dr. White',
+      caneNo: 'C-12',
+      strawNo: 'S-0458',
+      clSide: 'Right',
+      comments: ''
     }
   ]
 } satisfies { [K in TProcessId]: TFileRow<K>[] }
