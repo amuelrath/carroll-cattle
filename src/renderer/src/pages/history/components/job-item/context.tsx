@@ -7,7 +7,7 @@ interface JobItemContextValue {
   job: Job
 }
 
-export const JobItemContext = createContext<JobItemContextValue | null>(null)
+const JobItemContext = createContext<JobItemContextValue | null>(null)
 
 export function JobProvider({ children, job }: { children: React.ReactNode; job: Job }) {
   const value = useMemo(() => ({ job }), [job])

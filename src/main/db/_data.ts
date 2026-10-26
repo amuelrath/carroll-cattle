@@ -15,6 +15,11 @@ export const processSeed: TInsertProcess[] = [
     id: 'pregCheck',
     name: 'Pregnancy Checks',
     desc: 'Update recipient profiles in CattleMax.'
+  },
+  {
+    id: 'flush',
+    name: 'Flush',
+    desc: 'Flush donors in CattleMax'
   }
   // {
   //   id: 'transOvaInventory',
@@ -22,3 +27,11 @@ export const processSeed: TInsertProcess[] = [
   //   desc: 'Add new embryo shipment to inventory in CattleMax.'
   // },
 ]
+
+// export const utilityProcessSeed: TInsertUtilityProcess[] = [
+//   {
+//     id: 'transOvaInventory',
+//     name: 'Inventory Reconciliation',
+//     desc: 'Ensure that reported production matches inventory.'
+//   }
+// ]

@@ -7,8 +7,8 @@ import { JobContent } from './components/content'
 import { JobSidebar } from './components/sidebar'
 
 export function NewJobPage(): React.JSX.Element {
-  const { processId } = useSearch({ from: '/jobs/new/' })
-  const navigate = useNavigate({ from: '/jobs/new/' })
+  const { processId } = useSearch({ from: '/jobs/' })
+  const navigate = useNavigate({ from: '/jobs/' })
 
   const handleTabChange = async (tabId: TProcessId) => {
     await navigate({ search: (prev) => ({ ...prev, processId: tabId }), replace: true })

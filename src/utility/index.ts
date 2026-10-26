@@ -3,7 +3,8 @@ import { postPortMessage } from '@utility/ipc'
 import { MessagePortMain } from 'electron'
 import { type Browser, type CDPSession, chromium, type Page } from 'playwright'
 
-const DEFAULT_PLAYWRIGHT_TIMEOUT = 10_000 // ms
+const DEFAULT_NAVIGATION_TIMEOUT = 10_000
+const DEFAULT_PLAYWRIGHT_TIMEOUT = 3_000 // ms
 
 let framePort: MessagePortMain
 let browser: Browser
@@ -27,8 +28,12 @@ const ready = (async () => {
     strictSelectors: true
   })
 
+  // WatchMe: dialogs will always be accepted.
+  ctx.on('dialog', (dialog) => dialog.accept())
+
   page = await ctx.newPage()
   ctx.setDefaultTimeout(DEFAULT_PLAYWRIGHT_TIMEOUT)
+  ctx.setDefaultNavigationTimeout(DEFAULT_NAVIGATION_TIMEOUT)
 
   // for streaming frames. we can only use jpeg if we use page.screencast()
   cdp = await page.context().newCDPSession(page)

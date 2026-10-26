@@ -2,7 +2,6 @@ import { CircularProgressWithIndicator } from '@renderer/components/common/circu
 import { PageTitlebar, PageTitlebarButtonGroup } from '@renderer/components/common/page'
 import { Separator } from '@renderer/components/ui/separator'
 import { ColumnMapperDialog } from '@renderer/pages/jobs/components/view/components/column-mapper'
-import { InfoModal } from '@renderer/pages/jobs/components/view/components/info-modal/view-info'
 import { ReviewerTrigger } from '@renderer/pages/jobs/components/view/components/reviewer'
 import { DownloadButton } from '@renderer/pages/jobs/components/view/components/ribbon/download-button'
 import { SpeedControls } from '@renderer/pages/jobs/components/view/components/ribbon/speed-controls'
@@ -31,7 +30,7 @@ export function ViewPageTitleBar({ sheet }: ViewPageTitlebarProps): React.JSX.El
         <div className="flex flex-row items-center space-x-2">
           <ColumnMapperDialog />
           <DownloadButton sheet={sheet} />
-          <InfoModal />
+          {/*<InfoModal />*/}
         </div>
       </PageTitlebarButtonGroup>
     </PageTitlebar>

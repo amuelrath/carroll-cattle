@@ -23,24 +23,25 @@ export function getColumns(columnMap: Record<string, string>, schema: z.ZodObjec
   }))
 }
 
-/* Must be in the same key space. Will not error if we aren't.  */
-export function getCellEdits(before: TRecord, after: TRecord): TCellEdit[] {
-  const normalize = (value: string | null | undefined): string | null => {
-    const trimmed = value?.trim()
+/* Must be in the same key space. Will not error if we aren't.  */ export function getCellEdits(
+  before: TRecord,
+  after: TRecord
+): TCellEdit[] {
+  const normalize = (value: unknown): string | null => {
+    if (typeof value !== 'string') return null
+    const trimmed = value.trim()
     return trimmed ? trimmed : null
   }
+  const read = (row: TRecord, key: string) => (Object.hasOwn(row, key) ? row[key] : undefined)
 
   const changes: TCellEdit[] = []
   const keys = new Set([...Object.keys(before), ...Object.keys(after)])
 
   for (const key of keys) {
-    const from = normalize(before[key])
-    const to = normalize(after[key])
-    if (from !== to) {
-      changes.push({ key, from, to })
-    }
+    const from = normalize(read(before, key))
+    const to = normalize(read(after, key))
+    if (from !== to) changes.push({ key, from, to })
   }
-
   return changes
 }
 
@@ -92,7 +93,6 @@ export function projectRow(
   }
 }
 
-// ToDo: Test!
 export function getSheetRow(
   task: TTaskWithRelationsIn,
   schema: z.ZodObject,

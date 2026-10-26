@@ -35,6 +35,7 @@ export function ReviewerTrigger({ sheet }: ReviewerProps) {
   return (
     <Dialog open={reviewOpen} onOpenChange={setReviewOpen}>
       <DialogTrigger
+        disabled={disabled}
         render={
           <Button
             className="flex min-w-44 flex-row items-center space-x-1 text-sm"
@@ -113,7 +114,7 @@ function ReviewerContent({ sheet }: { sheet: TMappedSheet }) {
           )}
         </AnimatePresence>
       </div>
-      <ReviewerRowData currRow={currRow} />
+      <ReviewerRowData currRow={currRow} columns={sheet.columns} />
       <ReviewerFooter allRows={sheet.rows} attemptedRows={attemptedRows} />
     </DialogContent>
   )

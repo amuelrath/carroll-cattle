@@ -23,7 +23,7 @@ export function HistoryPage(): React.JSX.Element {
           onProcessValueChange={setProcessValue}
         />
       </PageTitlebar>
-      <PageContent className="h-full space-y-2 p-4">
+      <PageContent className="scrollbar-custom h-full space-y-2 overflow-y-scroll p-4">
         <JobResults searchValue={searchValue} processValue={processValue} />
       </PageContent>
     </>
@@ -88,6 +88,17 @@ function SearchInput({
           size="sm"
         >
           Breeding
+        </Button>
+        <Button
+          onClick={() => onProcessValueChange('flush')}
+          variant={processValue === 'flush' ? 'secondary' : 'outline'}
+          className={cn(
+            'w-26 transition-none',
+            processValue !== 'flush' && 'text-muted-foreground'
+          )}
+          size="sm"
+        >
+          Flush
         </Button>
       </ButtonGroup>
     </div>

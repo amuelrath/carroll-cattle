@@ -1,9 +1,10 @@
+import { HomePage } from '@renderer/pages/home'
 import { createFileRoute } from '@tanstack/react-router'
 import { HomeIcon } from 'lucide-react'
 import React from 'react'
 
 export const Route = createFileRoute('/')({
-  component: HomePage,
+  component: Page,
   staticData: {
     icon: HomeIcon,
     navLabel: 'Home',
@@ -11,10 +12,6 @@ export const Route = createFileRoute('/')({
   }
 })
 
-function HomePage(): React.JSX.Element {
-  return (
-    <div className="p-2">
-      <h3>Welcome Home!</h3>
-    </div>
-  )
+function Page(): React.JSX.Element {
+  return <HomePage />
 }

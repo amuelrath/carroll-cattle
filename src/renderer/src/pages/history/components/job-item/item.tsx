@@ -1,3 +1,4 @@
+import Flush from '@renderer/assets/eyedropper.png'
 import Magnify from '@renderer/assets/magnify.png'
 import TestTube from '@renderer/assets/test-tube.png'
 import { Badge } from '@renderer/components/ui/badge'
@@ -36,7 +37,8 @@ export function JobItem({ job }: { job: TReadAllJobsRes[number] }): React.JSX.El
 
 const processIcons = {
   breeding: TestTube,
-  pregCheck: Magnify
+  pregCheck: Magnify,
+  flush: Flush
 } satisfies Record<TProcessId, string>
 
 function JobIcon() {

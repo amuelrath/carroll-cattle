@@ -9,7 +9,7 @@ import {
 } from '@renderer/components/ui/dropdown-menu'
 import { toast } from '@renderer/components/ui/toast'
 import { iconSizes } from '@renderer/lib/tokens'
-import { trpc } from '@renderer/lib/trpc'
+import { trpc, trpcClient } from '@renderer/lib/trpc'
 import { useJobItem } from '@renderer/pages/history/components/job-item/context'
 import { sheetToJson } from '@shared/lib/sheet'
 import { useNavigate } from '@tanstack/react-router'
@@ -23,6 +23,74 @@ import {
 } from 'lucide-react'
 import React, { useState } from 'react'
 
+function useJobActions() {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [renameOpen, setRenameOpen] = useState(false)
+
+  const utils = trpc.useUtils()
+
+  const { mutateAsync: openPath } = trpc.system.openPath.useMutation()
+
+  const { mutateAsync: renameJob } = trpc.job.renameJob.useMutation({
+    onSuccess: async () => {
+      await utils.job.readAllJobs.refetch()
+    },
+    onSettled: () => {
+      setRenameOpen(false)
+    }
+  })
+
+  const { mutateAsync: deleteJob } = trpc.job.deleteJob.useMutation({
+    onSuccess: async () => {
+      await utils.job.readAllJobs.refetch()
+    },
+    onSettled: () => {
+      setDeleteOpen(false)
+    }
+  })
+
+  const handleDownloadSheet = async (jobId: number) => {
+    const sheet = await trpcClient.sheet.getSheet.query({ jobId })
+
+    if (!sheet)
+      return toast.add({
+        type: 'warning',
+        title: 'Cannot Export Sheet',
+        description: 'That sheet could not be found.'
+      })
+
+    if (!sheet.mapped)
+      return toast.add({
+        type: 'warning',
+        title: 'Cannot Export Sheet',
+        description: 'The sheet you are trying to export has not been mapped.'
+      })
+
+    const rows = sheet.rows.map((row) => row.copyRow)
+    const title = `${sheet.file.fileName} (Revised)`
+    return sheetToJson(rows, title)
+  }
+
+  return {
+    rename: {
+      renameOpen,
+      setRenameOpen,
+      renameJob
+    },
+    remove: {
+      removeOpen: deleteOpen,
+      setRemoveOpen: setDeleteOpen,
+      deleteJob
+    },
+    open: {
+      openPath
+    },
+    download: {
+      handleDownloadSheet
+    }
+  }
+}
+
 export function JobDropdown(): React.JSX.Element {
   const {
     job: {
@@ -32,61 +100,9 @@ export function JobDropdown(): React.JSX.Element {
     }
   } = useJobItem()
 
+  const { remove, download, open, rename } = useJobActions()
+
   const navigate = useNavigate()
-
-  const [deleteOpen, setDeleteOpen] = useState(false)
-  const [renameOpen, setRenameOpen] = useState(false)
-
-  const utils = trpc.useUtils()
-  const { data: sheet } = trpc.sheet.getSheet.useQuery({ jobId })
-  const { mutateAsync: mutateRenameJob } = trpc.job.renameJob.useMutation({
-    onSuccess: async () => {
-      await utils.job.readAllJobs.refetch()
-    },
-    onSettled: () => {
-      setRenameOpen(false)
-    }
-  })
-  const { mutateAsync: mutateOpenPath } = trpc.system.openPath.useMutation()
-  const { mutateAsync: mutateDeleteJob } = trpc.job.deleteJob.useMutation({
-    onSuccess: async () => {
-      await utils.job.readAllJobs.refetch()
-    },
-    onSettled: () => {
-      setDeleteOpen(false)
-    }
-  })
-
-  const handleOpenFile = async () => {
-    await mutateOpenPath({ filePath })
-  }
-
-  const handleDownloadSheet = () => {
-    if (!sheet)
-      return toast.add({
-        type: 'warning',
-        title: 'Cannot Export Sheet',
-        description: 'The sheet you are trying to export does not exist.'
-      })
-
-    if (!sheet.mapped)
-      return toast.add({
-        type: 'warning',
-        title: 'Cannot Export Sheet',
-        description: 'The sheet you are trying to export has not been mapped.'
-      })
-    const rows = sheet.rows.map((row) => row.copyRow)
-    const title = `${sheet.file.fileName} (Revised)`
-    return sheetToJson(rows, title)
-  }
-
-  const handleRenameJob = async (title: string) => {
-    console.log(title)
-    await mutateRenameJob({
-      jobId,
-      title
-    })
-  }
 
   const handleOpenReview = async () => {
     await navigate({
@@ -107,21 +123,21 @@ export function JobDropdown(): React.JSX.Element {
               </Button>
             }
           />
-          <DropdownMenuContent className="w-[150px]">
+          <DropdownMenuContent className="w-50">
             <JobActions
-              openDelete={() => setDeleteOpen(true)}
-              openRename={() => setRenameOpen(true)}
-              openFile={handleOpenFile}
-              downloadSheet={handleDownloadSheet}
+              openDelete={() => remove.setRemoveOpen(true)}
+              openRename={() => rename.setRenameOpen(true)}
+              openFile={() => open.openPath({ filePath })}
+              downloadSheet={() => download.handleDownloadSheet(jobId)}
               openReview={handleOpenReview}
             />
           </DropdownMenuContent>
         </div>
       </DropdownMenu>
       <ConfirmDialog
-        open={deleteOpen}
-        setOpen={setDeleteOpen}
-        onConfirm={() => mutateDeleteJob({ jobId })}
+        open={remove.removeOpen}
+        setOpen={remove.setRemoveOpen}
+        onConfirm={() => remove.deleteJob({ jobId })}
         icon={TrashIcon}
         title="Delete Job"
         desc="Are you sure you want to delete this job?"
@@ -129,10 +145,10 @@ export function JobDropdown(): React.JSX.Element {
         confirmVariant="destructive"
       />
       <InputDialog
-        open={renameOpen}
-        setOpen={setRenameOpen}
+        open={rename.renameOpen}
+        setOpen={rename.setRenameOpen}
         defaultValue={jobTitle}
-        onSubmit={handleRenameJob}
+        onSubmit={(title) => rename.renameJob({ jobId, title })}
         icon={PencilIcon}
         title="Rename Job"
         desc="Give the job a descriptive name"
@@ -164,7 +180,7 @@ export function JobActions({
       <hr />
       <DropdownMenuItem onClick={openFile} className="flex flex-row items-center text-sm">
         <FileTextIcon className="text-muted-foreground size-3" />
-        <span>Open in Excel</span>
+        <span>Open Original in Excel</span>
       </DropdownMenuItem>
       <hr />
 
@@ -174,7 +190,7 @@ export function JobActions({
       </DropdownMenuItem>
       <DropdownMenuItem onClick={downloadSheet} className="flex flex-row items-center text-sm">
         <DownloadIcon className="text-muted-foreground size-3" />
-        <span>Export Sheet</span>
+        <span>Export Edited Sheet</span>
       </DropdownMenuItem>
       <hr />
       <DropdownMenuItem

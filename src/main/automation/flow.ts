@@ -1,5 +1,6 @@
 import { flows } from '@main/automation/flows'
 import type { Flow, Handlers } from '@main/automation/types'
+import { credentialsCache } from '@main/core/credentials'
 import { sel } from '@shared/automation'
 import { AbortedError, RowIssue } from '@shared/automation/errors'
 import type { TFileRow, TProcessId } from '@shared/schemas/jobs'
@@ -50,6 +51,7 @@ export async function runFlow<K extends TProcessId>(
   rows: TFileRow<K>[],
   h: Handlers
 ) {
+  await credentialsCache.load()
   const flow = flows[processId]
   await drive(flow.setup(), h)
 

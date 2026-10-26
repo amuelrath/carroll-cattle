@@ -9,17 +9,16 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
 import { Route as HistoryIndexRouteImport } from './routes/history/index'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as JobsIndexRouteImport } from './routes/jobs/index'
-import { Route as SettingsIndexRouteImport } from './routes/settings/index'
-import { Route as JobsNewIndexRouteImport } from './routes/jobs/new/index'
 import { Route as JobsViewIndexRouteImport } from './routes/jobs/view/index'
+import { Route as SettingsIndexRouteImport } from './routes/settings/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => rootRouteImport
 } as any)
 const HistoryIndexRoute = HistoryIndexRouteImport.update({
   id: '/history/',
@@ -36,11 +35,6 @@ const SettingsIndexRoute = SettingsIndexRouteImport.update({
   path: '/settings/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const JobsNewIndexRoute = JobsNewIndexRouteImport.update({
-  id: '/jobs/new/',
-  path: '/jobs/new/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const JobsViewIndexRoute = JobsViewIndexRouteImport.update({
   id: '/jobs/view/',
   path: '/jobs/view/',
@@ -52,7 +46,6 @@ export interface FileRoutesByFullPath {
   '/history/': typeof HistoryIndexRoute
   '/jobs/': typeof JobsIndexRoute
   '/settings/': typeof SettingsIndexRoute
-  '/jobs/new/': typeof JobsNewIndexRoute
   '/jobs/view/': typeof JobsViewIndexRoute
 }
 export interface FileRoutesByTo {
@@ -60,7 +53,6 @@ export interface FileRoutesByTo {
   '/history': typeof HistoryIndexRoute
   '/jobs': typeof JobsIndexRoute
   '/settings': typeof SettingsIndexRoute
-  '/jobs/new': typeof JobsNewIndexRoute
   '/jobs/view': typeof JobsViewIndexRoute
 }
 export interface FileRoutesById {
@@ -69,23 +61,14 @@ export interface FileRoutesById {
   '/history/': typeof HistoryIndexRoute
   '/jobs/': typeof JobsIndexRoute
   '/settings/': typeof SettingsIndexRoute
-  '/jobs/new/': typeof JobsNewIndexRoute
   '/jobs/view/': typeof JobsViewIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    '/' | '/history/' | '/jobs/' | '/settings/' | '/jobs/new/' | '/jobs/view/'
+  fullPaths: '/' | '/history/' | '/jobs/' | '/settings/' | '/jobs/view/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/history' | '/jobs' | '/settings' | '/jobs/new' | '/jobs/view'
-  id:
-    | '__root__'
-    | '/'
-    | '/history/'
-    | '/jobs/'
-    | '/settings/'
-    | '/jobs/new/'
-    | '/jobs/view/'
+  to: '/' | '/history' | '/jobs' | '/settings' | '/jobs/view'
+  id: '__root__' | '/' | '/history/' | '/jobs/' | '/settings/' | '/jobs/view/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -93,7 +76,6 @@ export interface RootRouteChildren {
   HistoryIndexRoute: typeof HistoryIndexRoute
   JobsIndexRoute: typeof JobsIndexRoute
   SettingsIndexRoute: typeof SettingsIndexRoute
-  JobsNewIndexRoute: typeof JobsNewIndexRoute
   JobsViewIndexRoute: typeof JobsViewIndexRoute
 }
 
@@ -127,13 +109,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SettingsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/jobs/new/': {
-      id: '/jobs/new/'
-      path: '/jobs/new'
-      fullPath: '/jobs/new/'
-      preLoaderRoute: typeof JobsNewIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/jobs/view/': {
       id: '/jobs/view/'
       path: '/jobs/view'
@@ -149,7 +124,6 @@ const rootRouteChildren: RootRouteChildren = {
   HistoryIndexRoute: HistoryIndexRoute,
   JobsIndexRoute: JobsIndexRoute,
   SettingsIndexRoute: SettingsIndexRoute,
-  JobsNewIndexRoute: JobsNewIndexRoute,
   JobsViewIndexRoute: JobsViewIndexRoute,
 }
 export const routeTree = rootRouteImport
