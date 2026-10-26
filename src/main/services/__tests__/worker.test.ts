@@ -22,6 +22,7 @@ vi.mock('electron', async () => {
   }
 
   return {
+    app: { isPackaged: false },
     utilityProcess: {
       fork: vi.fn(() => {
         const child = new FakeUtilityProcess()

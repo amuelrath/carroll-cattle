@@ -69,16 +69,17 @@ class PlaywrightRPC extends EventEmitter {
   }
 }
 
-const browsersPath =
-  app.isPackaged ?
-    path.join(
-      process.resourcesPath,
-      'app.asar.unpacked',
-      'node_modules',
-      'playwright-core',
-      '.local-browsers'
-    )
-  : '0'
+function getBrowsersPath() {
+  return app.isPackaged ?
+      path.join(
+        process.resourcesPath,
+        'app.asar.unpacked',
+        'node_modules',
+        'playwright-core',
+        '.local-browsers'
+      )
+    : '0'
+}
 
 export class WorkerService extends EventEmitter {
   public rpc: PlaywrightRPC | undefined = undefined
@@ -97,7 +98,7 @@ export class WorkerService extends EventEmitter {
     this.child = utilityProcess.fork(path.join(__dirname, 'worker.js'), [], {
       serviceName: this.name,
       allowLoadingUnsignedLibraries: true,
-      env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: browsersPath }
+      env: { ...process.env, PLAYWRIGHT_BROWSERS_PATH: getBrowsersPath() }
     })
 
     this.rpc = new PlaywrightRPC(this.child)
