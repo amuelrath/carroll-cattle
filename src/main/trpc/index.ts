@@ -16,7 +16,8 @@ export const appRouter = router({
   job: jobRouter,
   process: processRouter,
   automation: automationRouter,
-  file: fileRouter
+  file: fileRouter,
+  credentials: credentialsRouter
 })
 
 export type AppRouter = typeof appRouter
