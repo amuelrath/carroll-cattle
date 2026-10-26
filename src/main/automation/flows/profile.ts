@@ -2,6 +2,7 @@ import { findFirst } from '@main/automation/flows/find-first'
 import type {
   Authed,
   BreedingTab,
+  EmbryoTab,
   Profile,
   ScopeConsumer,
   ScopeProvider,
@@ -14,7 +15,7 @@ import { errors } from 'playwright'
 
 export function findMatchingTagOrThrow(earTag: string, results: Record<string, unknown>[]) {
   if (!results || !Array.isArray(results))
-    throw new RowIssue('NOT_FOUND', `Search for "${earTag}" yielded multiple active animals.`)
+    throw new RowIssue('NOT_FOUND', `Search for "${earTag}" yielded no active animals.`)
 
   const rows = results.map((r) => ZAnimalSearchResultRow.parse(r))
   const activeAnimals = rows.filter((r) => r.Status === 'Active')
