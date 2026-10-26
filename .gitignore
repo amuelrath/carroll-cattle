@@ -1,13 +1,12 @@
 node_modules
 dist
 out
+build
 .DS_Store
 .eslintcache
 *.log*
 .env
 .idea
 .vscode
-.vitest/
-.vitest/
 .vitest/
 .vitest/
