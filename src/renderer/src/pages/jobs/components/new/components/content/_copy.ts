@@ -70,5 +70,49 @@ export const exampleRows = {
       clSide: 'Right',
       comments: ''
     }
+  ],
+  flush: [
+    {
+      date: '2026-03-14',
+      donorTag: '707',
+      sireTag: 'Bar R Prime Time 412',
+      type: 'Conventional',
+      recovered: 14,
+      degenerate: 2,
+      unfertilized: 3,
+      discarded: 1,
+      usable: 8,
+      transferred: 3,
+      frozen: 5,
+      comments: ''
+    },
+
+    // IVF session with oocytes recovered, no comments
+    {
+      date: '2026-05-02',
+      donorTag: '606',
+      sireTag: 'Connealy Thunder 7C',
+      type: 'IVF',
+      recovered: 22,
+      degenerate: 5,
+      unfertilized: 8,
+      discarded: 2,
+      usable: 7,
+      transferred: 0,
+      frozen: 7,
+      comments: ''
+    },
+
+    // Partial record: only required fields plus a few counts
+    {
+      date: '2026-08-19',
+      donorTag: '320',
+      sireTag: 'SAV Resource 1441',
+      type: 'Conventional',
+      recovered: 6,
+      usable: 4,
+      transferred: 4,
+      comments: ''
+    }
   ]
 } satisfies { [K in TProcessId]: TFileRow<K>[] }

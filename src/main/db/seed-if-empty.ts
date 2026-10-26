@@ -11,7 +11,7 @@ export async function seedIfEmpty() {
       await getDb().insert(processes).values(processSeed)
       log.info('Seeding complete.')
     } else {
-      log.info('DB already seeded. Skipping...')
+      log.info('Processes already seeded. Skipping...')
     }
   } catch (err) {
     log.error('Seeding failed: ', err)

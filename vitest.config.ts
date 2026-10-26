@@ -13,6 +13,8 @@ export default defineConfig({
   },
   test: {
     environment: 'node',
+    globals: true,
+    clearMocks: true,
     include: ['src/**/*.{test,spec}.{ts,tsx}']
   }
 })

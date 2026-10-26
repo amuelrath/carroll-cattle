@@ -15,6 +15,11 @@ export const processSeed: TInsertProcess[] = [
     id: 'pregCheck',
     name: 'Pregnancy Checks',
     desc: 'Update recipient profiles in CattleMax.'
+  },
+  {
+    id: 'flush',
+    name: 'Flush',
+    desc: 'Flush donors in CattleMax'
   }
   // {
   //   id: 'transOvaInventory',
