@@ -45,12 +45,14 @@ app.whenReady().then(async () => {
   // mainWindow.webContents.openDevTools({ mode: 'detach' })
 
   // Register tRPC router
-  createIPCHandler({ createContext, router: appRouter, windows: [mainWindow] })
+  const ipcHandler = createIPCHandler({ createContext, router: appRouter, windows: [mainWindow] })
 
   app.on('activate', function () {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createMainWindow()
+    if (BrowserWindow.getAllWindows().length === 0) {
+      ipcHandler.attachWindow(createMainWindow())
+    }
   })
 })
 

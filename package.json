@@ -18,7 +18,7 @@
     "postinstall": "electron-builder install-app-deps && patch-package && cross-env PLAYWRIGHT_BROWSERS_PATH=0 playwright install chromium --only-shell",
     "build:unpack": "npm run build && electron-builder --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:mac": "electron-vite build && electron-builder --mac --arm64",
     "build:linux": "electron-vite build && electron-builder --linux"
   },
   "dependencies": {
